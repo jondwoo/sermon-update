@@ -1,4 +1,4 @@
-## Python script to automate NLPC's video sermon uploads ## <br>
+## Python script to automate NLPC's video sermon uploads <br>
 <br>
 Note:<br>
 * The script starts from Jan 5, 2020 (ID: 40782442)
