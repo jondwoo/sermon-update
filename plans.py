@@ -6,7 +6,8 @@ Project Details:
     - date
     - preacher
 """
-import requests, json
+import requests
+import json
 import tokens
 
 url = "https://api.planningcenteronline.com/services/v2/service_types/800507/plans?offset=94"
@@ -23,6 +24,4 @@ def getSundayPlanIDs():
     return id_list
 
 
-if __name__ == "__main__":
-    id_list = getSundayPlanIDs()
-    print(id_list)
+
