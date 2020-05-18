@@ -20,7 +20,9 @@ def getCurrPlanID():
                 return row[1]  # return the value of curr_id
 
 def getPlanDates(curr_id, next_id):
-    
+    sermon_date = ''
+    next_sermon_date = ''
+
     # current sermon date
     plan_details_url = (
         f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/')
@@ -32,7 +34,6 @@ def getPlanDates(curr_id, next_id):
 
     sermon_date = body['data']['attributes']['dates']
 
-    next_sermon_date = ''
     # next sermon date
     plan_details_url = (
         f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{next_id}/')
