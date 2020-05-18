@@ -5,36 +5,43 @@
 # https://developers.google.com/explorer-help/guides/code_samples#python
 
 import os
+import tokens
+import json
+import config
 
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 
-scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
-def main():
+def authenticateYoutubeAPI():
     # Disable OAuthlib's HTTPS verification when running locally.
     # *DO NOT* leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     api_service_name = "youtube"
     api_version = "v3"
-    client_secrets_file = "YOUR_CLIENT_SECRET_FILE.json"
+    DEVELOPER_KEY = tokens.KEY
 
-    # Get credentials and create an API client
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-        client_secrets_file, scopes)
-    credentials = flow.run_console()
     youtube = googleapiclient.discovery.build(
-        api_service_name, api_version, credentials=credentials)
+        api_service_name, api_version, developerKey = DEVELOPER_KEY)
+    
+    return youtube
 
-    request = youtube.channels().list(
-        part="snippet,contentDetails,statistics",
-        id="UC_x5XG1OV2P6uZZ5FSM9Ttw"
+def getChannelResource(channel):
+    request = youtube.channels().list( # pylint: disable=maybe-no-member
+        part="contentDetails",
+        maxResults=config.maxResults,
+        id="UCTFhNnaRpZTan-5K3yXWngw"
     )
-    response = request.execute()
+    channel = request.execute()
 
-    print(response)
+    for item in channel['items']:
+        print(json.dumps(item,indent=2))
 
 if __name__ == "__main__":
-    main()
+    youtube = authenticateYoutubeAPI()
+    getChannelResource(youtube)
+
+
+
