@@ -28,7 +28,7 @@ def authenticateYoutubeAPI():
     
     return youtube
 
-def getChannelResource(channel):
+def getChannelResource(youtube):
     request = youtube.channels().list( # pylint: disable=maybe-no-member
         part="contentDetails",
         maxResults=config.maxResults,
@@ -36,12 +36,29 @@ def getChannelResource(channel):
     )
     channel = request.execute()
 
-    for item in channel['items']:
-        print(json.dumps(item,indent=2))
+    return channel
 
-if __name__ == "__main__":
-    youtube = authenticateYoutubeAPI()
-    getChannelResource(youtube)
+def getVideos(youtube, nlpc):
+    videos = {}
+    video_title = ''
+    video_title_no_scripture = ''
+    video_id = ''
 
+    upload_list_id = nlpc['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+    request = youtube.playlistItems().list( # pylint: disable=maybe-no-member
+        part="snippet",
+        maxResults=config.maxResults,
+        playlistId=upload_list_id
+    )
+    uploads = request.execute()
+    
+    for video in uploads['items']:
+        video_title = video['snippet']['title']
+        split_str = video_title.split(' (', 1)
+        video_title_no_scripture = split_str[0]
 
-
+        video_id = video['snippet']['resourceId']['videoId']
+        
+        videos[video_title_no_scripture] = video_id
+    
+    return videos
