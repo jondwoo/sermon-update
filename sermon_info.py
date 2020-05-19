@@ -13,7 +13,7 @@ def compareDates(next_sermon_date):
     return (next_sermon_date <= today)
 
 def getCurrPlanID():
-    with open('planID.csv', 'r') as file:
+    with open('currPlanID.csv', 'r') as file:
         reader = csv.reader(file, delimiter='=')
         for row in reader:
             if row[0] == 'curr_id':
@@ -133,7 +133,7 @@ def getNextIDs(curr_id):
     return next_id, next_next_id
 
 def updateCurrID(next_id, next_next_id, curr_id):
-    with open('planID.csv', 'w', newline='') as file:
+    with open('currPlanID.csv', 'w', newline='') as file:
         writer = csv.writer(file, delimiter='=')
         writer.writerow(['curr_id', next_id])
         writer.writerow(['next_id', next_next_id])
