@@ -109,7 +109,7 @@ def getNextIDs(curr_id):
     next_id = ''
     next_next_id = ''
 
-    # get next
+    # get next ID
     plan_details_url = (
         f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/')
     r = requests.get(
