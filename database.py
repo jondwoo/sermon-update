@@ -24,7 +24,6 @@ def insertSermon(col, sermon, next_id, db_id):
     else:
         print(json.dumps(sermon,indent=2))
         col.insert_one(sermon)
-        sermon_info.updateCurrID(next_id, db_id)
         print(f"Inserted \"{sermon['sermon_title']}\"")
         return True
         

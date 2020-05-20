@@ -3,7 +3,7 @@
 Python script to automate NLPC's video sermon uploads<br><br>
 Note:
 * The plan ID starts from upcoming sermon 
-* CSV file updates automatically with the latest plan ID after every insert, and increments db_id
+* CSV file increments db_id and updates automatically with the latest plan ID after every insert
 * ommitting "/watch?v=" in youtube_id
 
 Dependencies:

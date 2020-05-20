@@ -40,7 +40,6 @@ def getChannelResource(youtube):
 
     return channel
 
-# only retrieve sermons by plan date
 def getVideos(youtube, nlpc):
     video_list = []
     video_title = ''
