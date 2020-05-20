@@ -2,4 +2,4 @@
 maxResults=26
 
 # Number of sermons to retrieve from database
-limit_val=6
+limit_val=9
