@@ -10,12 +10,7 @@ Dependencies:
 * Get personal token from PCO and api key from youtube API
     - `https://api.planningcenteronline.com/oauth/applications`
     - `https://developers.google.com/youtube/v3/docs`
-* Install google api client to access Youtube API
-    * `pip3 install google-api-python-client`
-* Install pymongo
-    * `pip3 install pymongo`
-* Install dnspython to access pymongo server
-    * `pip3 install dnspython`
+* Check requirements.txt for python libraries
 
 TODO:
 * update null values for existing sermons
