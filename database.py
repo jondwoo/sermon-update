@@ -1,7 +1,6 @@
 import tokens
 import pymongo
 import sermon_info
-import youtube
 import json
 import config
 from datetime import datetime
