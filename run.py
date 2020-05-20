@@ -18,6 +18,7 @@ if __name__ == "__main__":
     if inserted:
         # current ID updates on insert and points to upcoming sermon
         sermon_info.updateCurrID(next_id, db_id)
+        database.getSermonList(sermon_col, config.limit_val)
     else: 
         database.getSermonList(sermon_col, config.limit_val)
 
