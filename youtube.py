@@ -8,6 +8,8 @@ import os
 import tokens
 import json
 import config
+import re
+import datetime
 
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
@@ -38,8 +40,9 @@ def getChannelResource(youtube):
 
     return channel
 
+# only retrieve sermons by plan date
 def getVideos(youtube, nlpc):
-    videos = {}
+    video_list = []
     video_title = ''
     video_title_no_scripture = ''
     video_id = ''
@@ -53,12 +56,24 @@ def getVideos(youtube, nlpc):
     uploads = request.execute()
     
     for video in uploads['items']:
-        video_title = video['snippet']['title']
-        split_str = video_title.split(' (', 1)
-        video_title_no_scripture = split_str[0]
-
-        video_id = video['snippet']['resourceId']['videoId']
+        video_info = {}
+        #convert to datetime object to parse
+        video_date = video['snippet']['publishedAt']
+        video_date_obj = datetime.datetime.strptime(video_date, '%Y-%m-%dT%H:%M:%SZ')
         
-        videos[video_title_no_scripture] = video_id
+        video_id = video['snippet']['resourceId']['videoId']
+
+        # exclude scripture from video title
+        video_title = video['snippet']['title']
+        split_str = re.split(' -| \\(', video_title)
+        video_title_no_scripture = split_str[0]
+        
+        # populate video with resources from PCO API 
+        video_info['title'] = video_title_no_scripture
+        video_info['upload_date'] = video_date_obj.strftime("%Y-%m-%d")
+        video_info['id'] = video_id
+
+        video_list.append(video_info)
+        
     
-    return videos
+    return video_list
