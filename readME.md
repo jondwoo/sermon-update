@@ -2,10 +2,21 @@
 
 Python script to automate NLPC's video sermon uploads<br><br>
 Note:
-* The script starts from Jan 5, 2020 (ID: 40782442)
-* CSV file will update automatically with the latest plan as its curr_id
-* Initial run will take some time due to many API calls, but idea is that once database is populated starting from Jan 5, 2020, the script will only retrieve the latest week's sermon info 
+* The plan ID starts from upcoming sermon 
+* CSV file updates automatically with the latest plan ID after every insert, and increments db_id
+* ommitting "/watch?v=" in youtube_id
+
+Dependencies:
+* Get personal token from PCO and api key from youtube API
+    - `https://api.planningcenteronline.com/oauth/applications`
+    - `https://developers.google.com/youtube/v3/docs`
+* Install google api client to access Youtube API
+    * `pip3 install google-api-python-client`
+* Install pymongo
+    * `pip3 install pymongo`
+* Install dnspython to access pymongo server
+    * `pip3 install dnspython`
 
 TODO:
-* implement database
+* update null values for existing sermons
 
