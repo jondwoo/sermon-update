@@ -156,11 +156,11 @@ def getSermonInfo():
 
     # populate sermon with resources from PCO API
     sermon_info['_id'] = int(plan_IDs[2])
+    sermon_info['date'] = sermon_date.strftime('%Y-%m-%d')
     sermon_info['series'] = series_title
     sermon_info['sermon_title'] = sermon_title
     sermon_info['scripture'] = scripture
     sermon_info['speaker'] = speaker
-    sermon_info['date'] = sermon_date.strftime('%B %d, %Y')
     sermon_info['next_sermon_date'] = next_sermon_date.strftime('%Y-%m-%d')
     sermon_info['insert_date'] = datetime.date.today().strftime('%Y-%m-%d')
     sermon_info['plan_id'] = int(plan_IDs[0])
@@ -180,8 +180,7 @@ def getSermonInfo():
                 video_id = video['id']
                 sermon_info['youtube_id'] = video_id
     except AttributeError:
-        print('No sermon title in PCO API')
-        # print(f"Cannot add video_id for \"{sermon_info['sermon_title']}\"")
+        print(f"No sermon title in PCO for {sermon_info['date']}")
     
 
     return sermon_info

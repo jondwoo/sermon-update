@@ -3,6 +3,7 @@ import pymongo
 import sermon_info
 import youtube
 import json
+import config
 from datetime import datetime
 
 
@@ -15,32 +16,29 @@ def connectToDB():
 def getSermonCollection(db):
     return db.sermons
 
-def insertSermon(col, sermon):
-    # # check if video id exists for lastest sermon
-    # sermon_title = sermon['sermon_title']
-    # try:
+def insertSermon(col, sermon, next_id, db_id):
+    # returns true and false flag for while loop
+    if (sermon['youtube_id'] == ''):
+        print(f"No sermon video available for {sermon['date']}")
+        return False
+    else:
+        print(json.dumps(sermon,indent=2))
+        col.insert_one(sermon)
+        sermon_info.updateCurrID(next_id, db_id)
+        print(f"Inserted \"{sermon['sermon_title']}\"")
+        return True
         
-    #     if videos[sermon_title.lower()] == None:
-    #         sermon['youtube_id'] = ''
-    #     else:
-    #         video_id = videos[sermon_title.lower()]
-    #         sermon['youtube_id'] = video_id
-    # except AttributeError:
-    #     print('Sermon title does not exist in PCO API')
-    #     print('PCO API')
-    #     print(json.dumps(sermon,indent=2))
-    #     print('\nYOUTUBE API')
-    #     print(json.dumps(videos,indent=2))
-    
-    col.insert_one(sermon)
-    print(f"Inserted \"{sermon['sermon_title']}\"")
-
 def deleteAll(db):
     db.sermons.delete_many({})
 
-def findSermons(collection, limit_val):
+def getSermonList(collection, limit_val):
+    sermon_dict = {}
+    sermon_list = []
     print(f'Retrieving last {limit_val} sermons')
-
     cursor = collection.find().sort('_id', pymongo.DESCENDING).limit(limit_val)
+    sermon_dict['data'] = sermon_list
     for sermon in cursor:
-        print(json.dumps(sermon, indent=2))
+        sermon_list.append(sermon)
+
+    print(json.dumps(sermon_dict, indent=2))
+    # return sermon_dict
