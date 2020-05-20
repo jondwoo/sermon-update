@@ -2,3 +2,4 @@
 tokens.py
 .vscode
 test.py
+*.pyc
