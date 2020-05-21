@@ -45,7 +45,7 @@ if __name__ == "__main__":
     '''
     auto generate page with configured number of rows and columns
     '''
-    print('Updating page..')
+    print('Updating page...')
     content = generatePage.generatePage()
     
     if (generatePage.isGenerated(content)):
