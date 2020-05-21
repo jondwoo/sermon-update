@@ -4,12 +4,11 @@ import tokens
 import csv
 import youtube
 import datetime
-
+import os
 
 def isNewSermon(sermon_date, upload_date):
     print(sermon_date, upload_date)
     return sermon_date == upload_date
-
 
 def getPlanID_info():
     curr_id = ''
@@ -18,13 +17,14 @@ def getPlanID_info():
     db_id = ''
 
     # get current ID
-    with open('currentPlanID.csv', 'r') as file:
-        reader = csv.reader(file, delimiter='=')
-        for row in reader:
-            if row[0] == 'curr_id':
-                curr_id = row[1]
-            if row[0] == 'db_id':
-                db_id = row[1] 
+    if os.path.isfile(os.getcwd() + '/currentPlanID.csv'):
+        with open(os.getcwd() + '/currentPlanID.csv', 'r') as file:
+            reader = csv.reader(file, delimiter='=')
+            for row in reader:
+                if row[0] == 'curr_id':
+                    curr_id = row[1]
+                if row[0] == 'db_id':
+                    db_id = row[1] 
 
     # get next ID
     plan_details_url = (
