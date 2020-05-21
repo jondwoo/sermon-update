@@ -42,5 +42,5 @@ def getSermonList(collection, limit_val):
     for sermon in cursor:
         sermon_list.append(sermon)
 
-    print(json.dumps(sermon_dict, indent=2))
-    # return sermon_dict
+    # print(json.dumps(sermon_dict, indent=2))
+    return sermon_dict
