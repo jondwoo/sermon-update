@@ -3,3 +3,4 @@ tokens.py
 .vscode
 test.py
 *.pyc
+*copy.html

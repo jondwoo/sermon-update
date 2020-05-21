@@ -10,6 +10,7 @@ def isNewSermon(sermon_date, upload_date):
     print(sermon_date, upload_date)
     return sermon_date == upload_date
 
+
 def getPlanID_info():
     curr_id = ''
     next_id = ''
@@ -38,6 +39,7 @@ def getPlanID_info():
 
     return curr_id, next_id, db_id
     
+
 def getPlanDates(curr_id, next_id):
     sermon_date = ''
     next_sermon_date = ''
@@ -71,6 +73,7 @@ def getPlanDates(curr_id, next_id):
     # .strftime('%Y-%m-%d')
     return sermon_date, next_sermon_date
 
+
 def getPlanTitle(curr_id):
     sermon_title = ''
     plan_items_url = (
@@ -85,6 +88,7 @@ def getPlanTitle(curr_id):
         if (item['attributes']['title'] == 'Preaching of the Word'):
             sermon_title = item['attributes']['description']  
     return sermon_title
+
 
 def getPlanScripture(curr_id):
     scripture = ''
@@ -101,6 +105,7 @@ def getPlanScripture(curr_id):
             scripture = item['attributes']['description']
     return scripture
 
+
 def getPlanSpeaker(curr_id):
     speaker = ''
     plan_team_members_url = (
@@ -116,6 +121,7 @@ def getPlanSpeaker(curr_id):
             speaker = item['attributes']['name']
     return speaker
 
+
 def getPlanSeries(curr_id):
     series_title = ''
     plan_details_url = (
@@ -130,11 +136,13 @@ def getPlanSeries(curr_id):
         series_title = body['data']['attributes']['series_title']
     return series_title
 
+
 def updateCurrID(next_id, db_id):
     with open('currentPlanID.csv', 'w', newline='') as file:
         writer = csv.writer(file, delimiter='=')
         writer.writerow(['curr_id', next_id])
         writer.writerow(['db_id', int(db_id)+1])
+
 
 def getSermonInfo():
     # Jan 5, 2020: 40782442
@@ -182,5 +190,4 @@ def getSermonInfo():
     except AttributeError:
         print(f"No sermon title in PCO for {sermon_info['date']}")
     
-
     return sermon_info

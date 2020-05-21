@@ -9,11 +9,13 @@ from datetime import datetime
 def connectToDB():
     client = pymongo.MongoClient(f'mongodb+srv://{tokens.USERNAME}:{tokens.PASS}@cluster0-fmo1o.mongodb.net/test?retryWrites=true&w=majority')
     db = client.nlpc
-    
+
     return db
+
 
 def getSermonCollection(db):
     return db.sermons
+
 
 def insertSermon(col, sermon, next_id, db_id):
     # returns true and false flag for while loop
@@ -26,8 +28,10 @@ def insertSermon(col, sermon, next_id, db_id):
         print(f"Inserted \"{sermon['sermon_title']}\"")
         return True
         
+
 def deleteAll(db):
     db.sermons.delete_many({})
+
 
 def getSermonList(collection, limit_val):
     sermon_dict = {}

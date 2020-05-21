@@ -6,6 +6,7 @@ import datetime
 import config
 
 
+
 if __name__ == "__main__":
     mydb = database.connectToDB()
     # database.deleteAll(mydb)  # for testing
