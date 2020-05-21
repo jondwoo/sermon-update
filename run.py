@@ -10,24 +10,24 @@ import generatePage
 
 if __name__ == "__main__":
 
-    # '''
-    # retrieve sermon info from API and insert to DB
-    # '''
-    # print('Updating database...')
-    # mydb = database.connectToDB()
-    # # database.deleteAll(mydb)  # for testing
-    # sermon_col = database.getSermonCollection(mydb)
+    '''
+    retrieve sermon info from API and insert to DB
+    '''
+    print('Updating database...')
+    mydb = database.connectToDB()
+    # database.deleteAll(mydb)  # for testing
+    sermon_col = database.getSermonCollection(mydb)
 
 
-    # ## manual inserts
-    # sermon = sermon_info.getSermonInfo()
-    # curr_id, next_id, db_id = sermon_info.getPlanID_info()
-    # inserted = database.insertSermon(sermon_col, sermon, next_id, db_id)
-    # if inserted:
-    #     # current ID updates on insert and points to upcoming sermon
-    #     sermon_info.updateCurrID(next_id, db_id)
-    #     print('done')
-    # print('')
+    ## manual inserts
+    sermon = sermon_info.getSermonInfo()
+    curr_id, next_id, db_id = sermon_info.getPlanID_info()
+    inserted = database.insertSermon(sermon_col, sermon, next_id, db_id)
+    if inserted:
+        # current ID updates on insert and points to upcoming sermon
+        sermon_info.updateCurrID(next_id, db_id)
+        print('done')
+    print('')
 
 
     ## batch inserts

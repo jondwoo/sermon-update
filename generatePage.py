@@ -25,14 +25,14 @@ def generatePage():
     sermon_col = database.getSermonCollection(mydb)
     recent_sermons = database.getSermonList(sermon_col, config.limit_val)
     
-    # update page only if all fields (except series) available  in recent sermons
+    # check if all fields (except series) available in recent sermons
     for sermon in recent_sermons['data']:
         for field in sermon:
             if field != 'series':
                 if sermon[field] == '':
                     return sermon
 
-    # replace {{FIELD}} for every sermon
+    # replace HTML {{FIELD}} for every sermon
     for sermon in recent_sermons['data']:
         formatted_date = datetime.datetime.strptime(sermon['date'], '%Y-%m-%d').date().strftime('%B %d, %Y')
 
@@ -47,7 +47,7 @@ def generatePage():
         )
         count += 1 # keep track of each card
         
-        # at every config.col, append to body and make a new row
+        # at every config.col value, append to body and make a new row
         if count == config.col:
             sermon_body.append('<div class=\"row\">')
             for index in range(len(sermon_row)):
