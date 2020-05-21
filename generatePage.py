@@ -18,6 +18,7 @@ def generatePage():
     # retrieve sermons from database
     mydb = database.connectToDB()
     sermon_col = database.getSermonCollection(mydb)
+    print(f'Retrieving last {config.limit_val} sermons')
     recent_sermons = database.getSermonList(sermon_col, config.limit_val)
     
     # replace {{FIELD}} for every sermon
@@ -64,6 +65,6 @@ def writeToFile(filename, content):
             writer.write(html)
 
 
-if __name__ == "__main__":
-    index_html = generatePage()
-    writeToFile('sermon_page.html', index_html)
+# if __name__ == "__main__":
+#     index_html = generatePage()
+#     writeToFile('sermon_page.html', index_html)

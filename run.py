@@ -4,10 +4,16 @@ import json
 import database
 import datetime
 import config
+import generatePage
 
 
 
 if __name__ == "__main__":
+
+    '''
+    grab sermon info from API and insert to DB
+    '''
+    print('updating database...')
     mydb = database.connectToDB()
     # database.deleteAll(mydb)  # for testing
     sermon_col = database.getSermonCollection(mydb)
@@ -22,6 +28,8 @@ if __name__ == "__main__":
         database.getSermonList(sermon_col, config.limit_val)
     else: 
         database.getSermonList(sermon_col, config.limit_val)
+    print('done')
+    print('')
 
     ## batch inserts
     # while(True):
@@ -43,3 +51,11 @@ if __name__ == "__main__":
     #         '$set' : {'sermon_title':'Living Hope in a Lost World'}
     #     }
     # )
+
+    '''
+    auto generate page with configured number of sermons
+    '''
+    print('updating page..')
+    index_html = generatePage.generatePage()
+    generatePage.writeToFile('sermon_page.html', index_html)
+    print('done')

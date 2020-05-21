@@ -36,7 +36,6 @@ def deleteAll(db):
 def getSermonList(collection, limit_val):
     sermon_dict = {}
     sermon_list = []
-    print(f'Retrieving last {limit_val} sermons')
     cursor = collection.find().sort('_id', pymongo.DESCENDING).limit(limit_val)
     sermon_dict['data'] = sermon_list
     for sermon in cursor:
