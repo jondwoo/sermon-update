@@ -9,6 +9,10 @@ sermon_template_path = "/templates/sermon-template.html"
 
 
 def generatePage():
+    '''
+    return HTML string content if successfully generated
+    return sermon in question if missing fields
+    '''
     sermon_body = []
     sermon_row = []
     count = 0
@@ -17,10 +21,17 @@ def generatePage():
     
     # retrieve sermons from database
     mydb = database.connectToDB()
-    sermon_col = database.getSermonCollection(mydb)
     print(f'Retrieving last {config.limit_val} sermons')
+    sermon_col = database.getSermonCollection(mydb)
     recent_sermons = database.getSermonList(sermon_col, config.limit_val)
     
+    # update page only if all fields (except series) available  in recent sermons
+    for sermon in recent_sermons['data']:
+        for field in sermon:
+            if field != 'series':
+                if sermon[field] == '':
+                    return sermon
+
     # replace {{FIELD}} for every sermon
     for sermon in recent_sermons['data']:
         formatted_date = datetime.datetime.strptime(sermon['date'], '%Y-%m-%d').date().strftime('%B %d, %Y')
@@ -36,8 +47,8 @@ def generatePage():
         )
         count += 1 # keep track of each card
         
-        # at every 3rd card, append to body and make a new row
-        if count == 3:
+        # at every config.col, append to body and make a new row
+        if count == config.col:
             sermon_body.append('<div class=\"row\">')
             for index in range(len(sermon_row)):
                 sermon_body.append(sermon_row[index])
@@ -59,12 +70,14 @@ def getFile(filename):
             return f.read()
 
 
-def writeToFile(filename, content):
+def updatePage(filename, content):
     with open(filename, 'w') as writer:
         for html in content:
             writer.write(html)
 
 
-# if __name__ == "__main__":
-#     index_html = generatePage()
-#     writeToFile('sermon_page.html', index_html)
+def isGenerated(content):
+    if (isinstance(content, str)):
+        return True
+    else:
+        return False
