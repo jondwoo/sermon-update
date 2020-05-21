@@ -1,3 +1,3 @@
-pip3 install google-api-python-client
-pip3 install pymongo
-pip3 install dnspython
+google-api-python-client
+pymongo
+dnspython
