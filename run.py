@@ -11,7 +11,7 @@ if __name__ == "__main__":
     # database.deleteAll(mydb)  # for testing
     sermon_col = database.getSermonCollection(mydb)
 
-    # ## manual inserts
+    ## manual inserts
     sermon = sermon_info.getSermonInfo()
     curr_id, next_id, db_id = sermon_info.getPlanID_info()
     inserted = database.insertSermon(sermon_col, sermon, next_id, db_id)
@@ -35,4 +35,10 @@ if __name__ == "__main__":
     #         break
 
 
-   
+    ## update May 10th sermon title
+    # sermon_col.update_one(
+    #     {'_id': 18},
+    #     {
+    #         '$set' : {'sermon_title':'Living Hope in a Lost World'}
+    #     }
+    # )
