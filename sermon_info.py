@@ -187,7 +187,7 @@ def getSermonInfo():
             
         # is a new sunday
         else:
-            # get new sunday sermons's info based on last sermon's next id
+            # get new sunday sermon's info based on last sermon's next id
             new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
             print(f"Retrieving new sermon information for {new_sunday_date}...")
             new_sermon = getNewSermon(last_sermon)
