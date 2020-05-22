@@ -9,10 +9,6 @@ sermon_template_path = "/templates/sermon-template.html"
 
 
 def generatePage():
-    '''
-    return HTML string content if successfully generated
-    return sermon in question if missing fields
-    '''
     sermon_body = []
     sermon_row = []
     count = 0
@@ -20,17 +16,8 @@ def generatePage():
     sermon_template = getFile(os.getcwd() + sermon_template_path)
     
     # retrieve sermons from database
-    mydb = database.connectToDB()
-    print(f'Retrieving last {config.limit_val} sermons')
-    sermon_col = database.getSermonCollection(mydb)
-    recent_sermons = database.getSermonList(sermon_col, config.limit_val)
-    
-    # check if all fields (except series) available in recent sermons
-    for sermon in recent_sermons['data']:
-        for field in sermon:
-            if field != 'series':
-                if sermon[field] == '':
-                    return sermon
+    print(f'Retrieving last {config.limit_val} complete sermons...')
+    recent_sermons = database.getSermonList(config.limit_val)
 
     # replace HTML {{FIELD}} for every sermon
     for sermon in recent_sermons['data']:
@@ -74,6 +61,7 @@ def updatePage(filename, content):
     with open(filename, 'w') as writer:
         for html in content:
             writer.write(html)
+    print('done')
 
 
 def isGenerated(content):

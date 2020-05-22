@@ -20,15 +20,9 @@ if __name__ == "__main__":
     print('')
 
 
-    # '''
-    # auto generate page with configured number of rows and columns
-    # '''
-    # print('Updating page...')
-    # content = generatePage.generatePage()
-    
-    # if (generatePage.isGenerated(content)):
-    #     generatePage.updatePage('sermon_page.html', content)
-    #     print('done')
-    # else:
-    #     print(f"Missing fields for sermon ID: {content['_id']}")
-    #     print(json.dumps(content, indent=2))
+    '''
+    auto generate page with configured number of rows and columns
+    '''
+    print('Updating page...')
+    content = generatePage.generatePage()
+    generatePage.updatePage('sermon_page.html', content)

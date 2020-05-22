@@ -34,7 +34,7 @@ def insertSermon(sermon):
             'youtube_id': sermon['youtube_id']
             } }
         col.update_one(my_query, new_values)
-        print(f"Updated sermon for {sermon['date']}")
+        print(f"Updated \"{sermon['sermon_title']}\"")
     else:
         # insert as new document
         print(json.dumps(sermon,indent=2))
@@ -46,15 +46,23 @@ def deleteAll():
     db.sermons.delete_many({})
 
 
-def getSermonList(collection, limit_val):
+def getSermonList(limit_val):
     sermon_dict = {}
     sermon_list = []
-    cursor = collection.find().sort('_id', pymongo.DESCENDING).limit(limit_val)
+    
+    # query for entries that are NOT null in all these fields
+    cursor = col.find({
+        "sermon_title": {'$ne': None},
+        "scripture": {'$ne': None},
+        "speaker": {'$ne': None},
+        "date": {'$ne': None},
+        "youtube_id": {'$ne': None},
+        }).sort('date', pymongo.DESCENDING).limit(limit_val)
     sermon_dict['data'] = sermon_list
     for sermon in cursor:
         sermon_list.append(sermon)
 
-    # print(json.dumps(sermon_dict, indent=2))
+    # pprint(sermon_dict)
     return sermon_dict
 
 
