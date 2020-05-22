@@ -13,5 +13,4 @@ Requirements:
 
 TODO:
 * send alert for missing sermon fields
-* fix row not displaying when not completely filled
-* add script options to handle sermon updates?
+* when ran, script should check all incomplete sermons to see if new fields available

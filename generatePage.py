@@ -10,7 +10,6 @@ sermon_template_path = "/templates/sermon-template.html"
 
 def generatePage():
     sermon_body = []
-    sermon_row = []
     count = 0
     page_template = getFile(os.getcwd() + page_template_path)
     sermon_template = getFile(os.getcwd() + sermon_template_path)
@@ -19,29 +18,34 @@ def generatePage():
     print(f'Retrieving last {config.limit_val} complete sermons...')
     recent_sermons = database.getSermonList(config.limit_val)
 
+    sermon_body.append('<div class=\"row\">')
     # replace HTML {{FIELD}} for every sermon
     for sermon in recent_sermons['data']:
         formatted_date = datetime.datetime.strptime(sermon['date'], '%Y-%m-%d').date().strftime('%B %d, %Y')
 
-        # add sermon to row
-        sermon_row.append(
-            sermon_template
-                .replace('{{YOUTUBEID}}', sermon['youtube_id'])
-                .replace('{{DATE}}', formatted_date)
-                .replace('{{TITLE}}', sermon['sermon_title'])
-                .replace('{{SPEAKER}}', sermon['speaker'])
-                .replace('{{SCRIPTURE}}', sermon['scripture'])
-        )
-        count += 1 # keep track of each card
-        
         # at every config.col value, append to body and make a new row
-        if count == config.col:
-            sermon_body.append('<div class=\"row\">')
-            for index in range(len(sermon_row)):
-                sermon_body.append(sermon_row[index])
+        if count != config.col:
+            sermon_body.append(
+                sermon_template
+                    .replace('{{YOUTUBEID}}', sermon['youtube_id'])
+                    .replace('{{DATE}}', formatted_date)
+                    .replace('{{TITLE}}', sermon['sermon_title'])
+                    .replace('{{SPEAKER}}', sermon['speaker'])
+                    .replace('{{SCRIPTURE}}', sermon['scripture'])
+            )
+            count += 1 # keep track of each card
+        else:
             sermon_body.append('</div>')
-            sermon_row = []
-            count = 0
+            sermon_body.append('<div class=\"row\">')
+            sermon_body.append(
+                sermon_template
+                    .replace('{{YOUTUBEID}}', sermon['youtube_id'])
+                    .replace('{{DATE}}', formatted_date)
+                    .replace('{{TITLE}}', sermon['sermon_title'])
+                    .replace('{{SPEAKER}}', sermon['speaker'])
+                    .replace('{{SCRIPTURE}}', sermon['scripture'])
+            )
+            count = 1
     
     # combine entire HTML element to one HTML element at index 0
     merged_sermon_body = [''.join(sermon_body[0:])]

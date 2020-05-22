@@ -31,12 +31,13 @@ def getSermonTitle(id):
         r = requests.get(
             plan_items_url, 
             auth=(tokens.APP_ID, tokens.SECRET)
-            )
+        )
         body = json.loads(r.text)
 
         for item in body['data']:
             if (item['attributes']['title'] == 'Preaching of the Word'):
-                sermon_title = item['attributes']['description']  
+                sermon_title = item['attributes']['description']
+
         return sermon_title
     except UnboundLocalError:
         print('No sermon title defined in PCO')
@@ -50,12 +51,13 @@ def getSermonScripture(id):
         r = requests.get(
             plan_items_url, 
             auth=(tokens.APP_ID, tokens.SECRET)
-            )
+        )
         body = json.loads(r.text)
 
         for item in body['data']:
             if (item['attributes']['title'] == 'Reading of the Word'):
                 scripture = item['attributes']['description']
+
         return scripture
     except UnboundLocalError:
         print('No scripture defined in PCO')
@@ -69,12 +71,13 @@ def getSermonSpeaker(id):
         r = requests.get(
             plan_team_members_url, 
             auth=(tokens.APP_ID, tokens.SECRET)
-            )
+        )
         body = json.loads(r.text)
 
         for item in body['data']:
             if (item['attributes']['team_position_name'] == 'Preacher'):
                 speaker = item['attributes']['name']
+
         return speaker
     except UnboundLocalError:
         print('No speaker defined in PCO')
@@ -82,31 +85,39 @@ def getSermonSpeaker(id):
     
 
 def getSermonDate(id):
-    plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
-    r = requests.get(
-        plan_details_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
+    try:
+        plan_details_url = (
+            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
+        r = requests.get(
+            plan_details_url, 
+            auth=(tokens.APP_ID, tokens.SECRET)
         )
-    body = json.loads(r.text)
+        body = json.loads(r.text)
 
-    sermon_date = body['data']['attributes']['dates']
-    #return as date object
-    sermon_date =  datetime.strptime(sermon_date, '%B %d, %Y').date()
-    return sermon_date
+        sermon_date = body['data']['attributes']['dates']
+        #return as date object
+        sermon_date =  datetime.strptime(sermon_date, '%B %d, %Y').date()
+        return sermon_date
+    except UnboundLocalError:
+        print('No date defined in PCO')
+        return None
 
 
 def getSermonNextID(id):
-    plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
-    r = requests.get(
-        plan_details_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
+    try:
+        plan_details_url = (
+            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
+        r = requests.get(
+            plan_details_url, 
+            auth=(tokens.APP_ID, tokens.SECRET)
         )
-    body = json.loads(r.text)
+        body = json.loads(r.text)
 
-    next_id = body['data']['relationships']['next_plan']['data']['id']
-    return next_id
+        next_id = body['data']['relationships']['next_plan']['data']['id']
+
+        return next_id
+    except UnboundLocalError:
+        print('No next sermon ID defined in PCO')
 
 
 def appendYoutubeID(sermon_title):
@@ -122,7 +133,7 @@ def appendYoutubeID(sermon_title):
                 video_id = video['id']
                 return video_id
     except AttributeError:
-        print('Cannot link youtube ID - no sermon title defined in PCO')
+        print('Cannot link youtube ID - No sermon title in PCO')
         return None
 
 
