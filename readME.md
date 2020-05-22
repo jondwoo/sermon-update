@@ -13,6 +13,4 @@ Requirements:
 
 TODO:
 * send alert for missing sermon fields
-* keep plan status via plan date
 * update web page with only valid video
-* keep track of last week's sermon until 12pm this sunday (so db checks for updates on every run)
