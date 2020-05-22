@@ -38,11 +38,12 @@ def getSermonList(limit_val):
     sermon_dict = {}
     sermon_list = []
     
-    # query for entries that are NOT null in all these fields
+    # query for entries that are NOT null in these fields
+    # i.e retrieve entries as long as it has sermon title, date, and youtube ID
     cursor = col.find({
         "sermon_title": {'$ne': None},
-        "scripture": {'$ne': None},
-        "speaker": {'$ne': None},
+        # "scripture": {'$ne': None},
+        # "speaker": {'$ne': None},
         "date": {'$ne': None},
         "youtube_id": {'$ne': None},
         }).sort('date', pymongo.DESCENDING).limit(limit_val)

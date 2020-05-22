@@ -37,10 +37,13 @@ def getSermonTitle(id):
         for item in body['data']:
             if (item['attributes']['title'] == 'Preaching of the Word'):
                 sermon_title = item['attributes']['description']
-
-        return sermon_title
+                if item['attributes']['description'] == '':
+                    # if blank return as None for query purposes
+                    return None
+                return sermon_title
     except UnboundLocalError:
         print('No sermon title defined in PCO')
+        # must return as None for query purposes
         return None
 
 
@@ -57,11 +60,14 @@ def getSermonScripture(id):
         for item in body['data']:
             if (item['attributes']['title'] == 'Reading of the Word'):
                 scripture = item['attributes']['description']
-
+                # check if scripture is empty or null
+                if item['attributes']['description'] == None or item['attributes']['description'] == '':
+                    print('No scripture defined in PCO')
+                    scripture =  ''
         return scripture
     except UnboundLocalError:
         print('No scripture defined in PCO')
-        return None
+        return ''
 
 
 def getSermonSpeaker(id):
@@ -77,11 +83,14 @@ def getSermonSpeaker(id):
         for item in body['data']:
             if (item['attributes']['team_position_name'] == 'Preacher'):
                 speaker = item['attributes']['name']
-
+                # check if speaker is empty or null
+                if item['attributes']['name'] == None or item['attributes']['name'] == '':
+                        print('No speaker defined in PCO')
+                        speaker =  ''
         return speaker
     except UnboundLocalError:
         print('No speaker defined in PCO')
-        return None
+        return ''
     
 
 def getSermonDate(id):
@@ -118,6 +127,7 @@ def getSermonNextID(id):
         return next_id
     except UnboundLocalError:
         print('No next sermon ID defined in PCO')
+        return ''
 
 
 def appendYoutubeID(sermon_title):
@@ -125,15 +135,15 @@ def appendYoutubeID(sermon_title):
     youtube_resource = youtube.authenticateYoutubeAPI()
     nlpc_resource = youtube.getChannelResource(youtube_resource)
     video_list = youtube.getVideos(youtube_resource, nlpc_resource)
-
     # populate sermon with youtube ID's from YOUTUBE API
+
     try:
         for video in video_list:
             if (video['title'].lower() == sermon_title.lower()):
                 video_id = video['id']
                 return video_id
     except AttributeError:
-        print('Cannot link youtube ID - No sermon title in PCO')
+        print('Cannot link youtube ID')
         return None
 
 
@@ -144,10 +154,12 @@ def updateLastSermon(sermon):
     sermon_info['sermon_title'] = getSermonTitle(sermon['plan_id'])
     sermon_info['scripture'] = getSermonScripture(sermon['plan_id'])
     sermon_info['speaker'] = getSermonSpeaker(sermon['plan_id'])
+
     # dates and id will never change
     sermon_info['date'] = sermon['date']
     sermon_info['plan_id'] = int(sermon['plan_id'])
     sermon_info['next_id'] = int(sermon['next_id'])
+
     sermon_info['youtube_id'] = appendYoutubeID(sermon_info['sermon_title'])
 
     return sermon_info
@@ -210,7 +222,13 @@ def getSermonInfo():
             new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
             print(f"Retrieving sermon information for {new_sunday_date}...")
             new_sermon = getNewSermon(last_sermon)
-            return new_sermon
+
+            # check new sunday date matches with current sunday date
+            if today == new_sermon['date']:
+                return new_sermon
+            else:
+                print('Sermon date not accurate')
+                return new_sermon
             
     # is empty
     else:

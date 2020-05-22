@@ -45,7 +45,6 @@ if __name__ == "__main__":
 
     while(True):
         print(f'Current date: {datetime.today().date()}')
-        # output current date
         sermon = sermon_info.getSermonInfo()
         if database.documentExists(sermon):
             database.updateSermon(sermon)
