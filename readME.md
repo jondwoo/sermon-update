@@ -4,6 +4,7 @@ Python script to automate NLPC's video sermon uploads<br><br>
 Note: 
 * ommitting "/watch?v=" in youtube_id
 * only the first sermon of a series will have sermon['series'] populated
+* if database is empty, it will populate starting from Jan 5, 2020
 
 Requirements:
 * Get personal token from PCO and api key from youtube API
