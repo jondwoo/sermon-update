@@ -73,7 +73,6 @@ def getSermonSpeaker(id):
         return None
     
 
-
 def getSermonDate(id):
     plan_details_url = (
         f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
@@ -117,16 +116,6 @@ def appendYoutubeID(sermon_title):
     except AttributeError:
         print('No sermon title defined in PCO')
         return None
-
-    # populate sermon with youtube ID's from YOUTUBE API
-    # try:
-    #     for video in video_list:
-    #         # either sermon title or sermon date must match that of video title or upload date to assign its video id to that sermon
-    #         if (video['title'].lower() == sermon_title.lower()):
-    #             video_id = video['id']
-    #             return video_id
-    # except AttributeError:
-    #     print(f"No sermon title in PCO for \"{sermon_title}\"")
 
 
 def updateLastSermon(sermon):
