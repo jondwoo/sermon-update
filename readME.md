@@ -13,5 +13,5 @@ Requirements:
 
 TODO:
 * send alert for missing sermon fields
-* fix col=3
+* fix row not displaying when not completely filled
 * add script options to handle sermon updates?
