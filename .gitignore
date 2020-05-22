@@ -4,3 +4,4 @@ tokens.py
 test.py
 *.pyc
 *copy.html
+sample_data.txt

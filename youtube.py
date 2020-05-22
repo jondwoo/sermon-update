@@ -41,11 +41,6 @@ def getChannelResource(youtube):
     return channel
 
 def getVideos(youtube, nlpc):
-    video_list = []
-    video_title = ''
-    video_title_no_scripture = ''
-    video_id = ''
-
     upload_list_id = nlpc['items'][0]['contentDetails']['relatedPlaylists']['uploads']
     request = youtube.playlistItems().list( # pylint: disable=maybe-no-member
         part="snippet",
@@ -53,9 +48,8 @@ def getVideos(youtube, nlpc):
         playlistId=upload_list_id
     )
     uploads = request.execute()
-    
+    video_list = []
     for video in uploads['items']:
-        video_info = {}
         #convert to datetime object to parse
         video_date = video['snippet']['publishedAt']
         video_date_obj = datetime.datetime.strptime(video_date, '%Y-%m-%dT%H:%M:%SZ')
@@ -67,12 +61,11 @@ def getVideos(youtube, nlpc):
         split_str = re.split(' -| \\(', video_title)
         video_title_no_scripture = split_str[0]
         
-        # populate video with resources from PCO API 
+        # populate video with resources from YOUTUBE API
+        video_info = {}
         video_info['title'] = video_title_no_scripture
         video_info['upload_date'] = video_date_obj.strftime("%Y-%m-%d")
         video_info['id'] = video_id
-
         video_list.append(video_info)
-        
-    
+
     return video_list

@@ -3,81 +3,30 @@ import json
 import tokens
 import csv
 import youtube
-import datetime
 import os
+import database
+from datetime import datetime
+from datetime import timedelta
 
-def isNewSermon(sermon_date, upload_date):
-    print(sermon_date, upload_date)
-    return sermon_date == upload_date
 
-def getPlanID_info():
-    curr_id = ''
-    next_id = ''
-    # id for db
-    db_id = ''
-
-    # get current ID
-    if os.path.isfile(os.getcwd() + '/currentPlanID.csv'):
-        with open(os.getcwd() + '/currentPlanID.csv', 'r') as file:
-            reader = csv.reader(file, delimiter='=')
-            for row in reader:
-                if row[0] == 'curr_id':
-                    curr_id = row[1]
-                if row[0] == 'db_id':
-                    db_id = row[1] 
-
-    # get next ID
+def getSermonSeries(id):
+    series_title = ''
     plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/')
+        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
     r = requests.get(
         plan_details_url, 
         auth=(tokens.APP_ID, tokens.SECRET)
         )
     body = json.loads(r.text)
 
-    next_id = body['data']['relationships']['next_plan']['data']['id']
-
-    return curr_id, next_id, db_id
-    
-
-def getPlanDates(curr_id, next_id):
-    sermon_date = ''
-    next_sermon_date = ''
-
-    # current sermon date
-    plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/')
-    r = requests.get(
-        plan_details_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
-
-    sermon_date = body['data']['attributes']['dates']
-
-    # next sermon date
-    plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{next_id}/')
-    r = requests.get(
-        plan_details_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
-
-    next_sermon_date = body['data']['attributes']['dates']
-    
-    #return as date object
-    sermon_date =  datetime.datetime.strptime(sermon_date, '%B %d, %Y').date()
-    # .strftime('%Y-%m-%d')
-    next_sermon_date =  datetime.datetime.strptime(next_sermon_date, '%B %d, %Y').date()
-    # .strftime('%Y-%m-%d')
-    return sermon_date, next_sermon_date
+    if body['data']['attributes']['series_title'] != None:
+        series_title = body['data']['attributes']['series_title']
+    return series_title
 
 
-def getPlanTitle(curr_id):
-    sermon_title = ''
+def getSermonTitle(id):
     plan_items_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/items')
+        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
     r = requests.get(
         plan_items_url, 
         auth=(tokens.APP_ID, tokens.SECRET)
@@ -90,10 +39,9 @@ def getPlanTitle(curr_id):
     return sermon_title
 
 
-def getPlanScripture(curr_id):
-    scripture = ''
+def getSermonScripture(id):
     plan_items_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/items')
+        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
     r = requests.get(
         plan_items_url, 
         auth=(tokens.APP_ID, tokens.SECRET)
@@ -106,74 +54,55 @@ def getPlanScripture(curr_id):
     return scripture
 
 
-def getPlanSpeaker(curr_id):
-    speaker = ''
-    plan_team_members_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/team_members')
-    r = requests.get(
-        plan_team_members_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
+def getSermonSpeaker(id):
+    try:
+        plan_team_members_url = (
+            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/team_members')
+        r = requests.get(
+            plan_team_members_url, 
+            auth=(tokens.APP_ID, tokens.SECRET)
+            )
+        body = json.loads(r.text)
 
-    for item in body['data']:
-        if (item['attributes']['team_position_name'] == 'Preacher'):
-            speaker = item['attributes']['name']
-    return speaker
+        for item in body['data']:
+            if (item['attributes']['team_position_name'] == 'Preacher'):
+                speaker = item['attributes']['name']
+        return speaker
+    except UnboundLocalError:
+        print('No speaker defined in PCO')
+        return None
+    
 
 
-def getPlanSeries(curr_id):
-    series_title = ''
+def getSermonDate(id):
     plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{curr_id}/')
+        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
     r = requests.get(
         plan_details_url, 
         auth=(tokens.APP_ID, tokens.SECRET)
         )
     body = json.loads(r.text)
 
-    if body['data']['attributes']['series_title'] != None:
-        series_title = body['data']['attributes']['series_title']
-    return series_title
+    sermon_date = body['data']['attributes']['dates']
+    #return as date object
+    sermon_date =  datetime.strptime(sermon_date, '%B %d, %Y').date()
+    return sermon_date
 
 
-def updateCurrID(next_id, db_id):
-    with open('currentPlanID.csv', 'w', newline='') as file:
-        writer = csv.writer(file, delimiter='=')
-        writer.writerow(['curr_id', next_id])
-        writer.writerow(['db_id', int(db_id)+1])
+def getSermonNextID(id):
+    plan_details_url = (
+        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
+    r = requests.get(
+        plan_details_url, 
+        auth=(tokens.APP_ID, tokens.SECRET)
+        )
+    body = json.loads(r.text)
+
+    next_id = body['data']['relationships']['next_plan']['data']['id']
+    return next_id
 
 
-def getSermonInfo():
-    # Jan 5, 2020: 40782442
-    # May 3, 2020: 46963824
-
-    ## PCO
-    sermon_info = {}
-
-    # plan_IDs[0] = current ID
-    # plan_IDs[1] = next ID
-    # plan_IDs[2] = db_id
-    plan_IDs = getPlanID_info() 
-
-    sermon_date, next_sermon_date = getPlanDates(plan_IDs[0], plan_IDs[1])
-    sermon_title = getPlanTitle(plan_IDs[0])
-    scripture = getPlanScripture(plan_IDs[0])
-    speaker = getPlanSpeaker(plan_IDs[0])
-    series_title = getPlanSeries(plan_IDs[0])
-
-    # populate sermon with resources from PCO API
-    sermon_info['_id'] = int(plan_IDs[2])
-    sermon_info['date'] = sermon_date.strftime('%Y-%m-%d')
-    sermon_info['series'] = series_title
-    sermon_info['sermon_title'] = sermon_title
-    sermon_info['scripture'] = scripture
-    sermon_info['speaker'] = speaker
-    sermon_info['next_sermon_date'] = next_sermon_date.strftime('%Y-%m-%d')
-    sermon_info['insert_date'] = datetime.date.today().strftime('%Y-%m-%d')
-    sermon_info['plan_id'] = int(plan_IDs[0])
-    sermon_info['youtube_id'] = ''
-
+def appendYoutubeID(sermon_title):
     ## YOUTUBE
     youtube_resource = youtube.authenticateYoutubeAPI()
     nlpc_resource = youtube.getChannelResource(youtube_resource)
@@ -182,12 +111,101 @@ def getSermonInfo():
     # populate sermon with youtube ID's from YOUTUBE API
     try:
         for video in video_list:
-            # either sermon title or sermon date must match that of video title or upload date to assign its video id to that sermon
-            if (video['title'].lower() == sermon_info['sermon_title'].lower() or
-                    video['upload_date'] == sermon_date.strftime('%Y-%m-%d')):
+            if (video['title'].lower() == sermon_title.lower()):
                 video_id = video['id']
-                sermon_info['youtube_id'] = video_id
+                return video_id
     except AttributeError:
-        print(f"No sermon title in PCO for {sermon_info['date']}")
-    
+        print('No sermon title defined in PCO')
+        return None
+
+    # populate sermon with youtube ID's from YOUTUBE API
+    # try:
+    #     for video in video_list:
+    #         # either sermon title or sermon date must match that of video title or upload date to assign its video id to that sermon
+    #         if (video['title'].lower() == sermon_title.lower()):
+    #             video_id = video['id']
+    #             return video_id
+    # except AttributeError:
+    #     print(f"No sermon title in PCO for \"{sermon_title}\"")
+
+
+def updateLastSermon(sermon):
+    # grab latest id and re-populate the data
+    sermon_info = {}
+    sermon_info['series'] = getSermonSeries(sermon['plan_id'])
+    sermon_info['sermon_title'] = getSermonTitle(sermon['plan_id'])
+    sermon_info['scripture'] = getSermonScripture(sermon['plan_id'])
+    sermon_info['speaker'] = getSermonSpeaker(sermon['plan_id'])
+    # dates and id will never change
+    sermon_info['date'] = sermon['date']
+    sermon_info['plan_id'] = int(sermon['plan_id'])
+    sermon_info['next_id'] = int(sermon['next_id'])
+    sermon_info['youtube_id'] = appendYoutubeID(sermon_info['sermon_title'])
+
     return sermon_info
+
+
+def getNewSermon(last_sermon):
+    sermon_info = {}
+    sermon_info['series'] = getSermonSeries(last_sermon['next_id'])
+    sermon_info['sermon_title'] = getSermonTitle(last_sermon['next_id'])
+    sermon_info['scripture'] = getSermonScripture(last_sermon['next_id'])
+    sermon_info['speaker'] = getSermonSpeaker(last_sermon['next_id'])
+    sermon_info['date'] = getSermonDate(last_sermon['next_id']).strftime('%Y-%m-%d')
+    sermon_info['plan_id'] = int(last_sermon['next_id'])
+    sermon_info['next_id'] = int(getSermonNextID(sermon_info['plan_id']))
+    sermon_info['youtube_id'] = appendYoutubeID(sermon_info['sermon_title'])
+
+    return sermon_info
+
+
+def getFirstPlan():
+    # get all plans
+    plans_url = ('https://api.planningcenteronline.com/services/v2/service_types/764160/plans?offset=105/')
+    r = requests.get(
+        plans_url, 
+        auth=(tokens.APP_ID, tokens.SECRET)
+        )
+    body = json.loads(r.text)
+
+    first_sermon_info = {}
+    plan_id = body['data'][0]['id']
+    first_sermon_info['series'] = getSermonSeries(plan_id)
+    first_sermon_info['sermon_title'] = getSermonTitle(plan_id)
+    first_sermon_info['scripture'] = getSermonScripture(plan_id)
+    first_sermon_info['speaker'] = getSermonSpeaker(plan_id)
+    first_sermon_info['date'] = datetime.strptime(body['data'][0]['attributes']['dates'], '%B %d, %Y').strftime('%Y-%m-%d')
+    first_sermon_info['plan_id'] = int(plan_id)
+    first_sermon_info['next_id'] = int(getSermonNextID(plan_id))
+    first_sermon_info['youtube_id'] = appendYoutubeID(first_sermon_info['sermon_title'])
+
+    return first_sermon_info
+
+
+def getSermonInfo():
+    # check if empty database
+    last_sermon = database.findMostRecent()
+    if last_sermon != None:
+        # if it is a new sunday, get new info, else update last sermon's info
+        last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
+        today = datetime.today()
+
+        # not a new sunday; update last sermon
+        if today < (last_sermon_date_obj + timedelta(days=7)):
+            print(f"Retrieving last sermon \"{last_sermon['sermon_title']}\" on {last_sermon['date']} for update...")
+            updated_sermon = updateLastSermon(last_sermon) 
+            return updated_sermon
+            
+        # is a new sunday
+        else:
+            # get new sunday sermons's info based on last sermon's next id
+            new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
+            print(f"Retrieving new sermon information for {new_sunday_date}...")
+            new_sermon = getNewSermon(last_sermon)
+            return new_sermon
+            
+    # is empty
+    else:
+        print("Databases is empty. Retrieving first sermon...")
+        first_sermon_info = getFirstPlan()
+        return first_sermon_info
