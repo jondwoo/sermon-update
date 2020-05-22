@@ -1,9 +1,7 @@
 ## Video Sermon Auto Upload
 
 Python script to automate NLPC's video sermon uploads<br><br>
-Note:
-* The plan ID starts from upcoming sermon 
-* CSV file increments db_id and updates automatically with the latest plan ID after every insert
+Note: 
 * ommitting "/watch?v=" in youtube_id
 * only the first sermon of a series will have sermon['series'] populated
 
