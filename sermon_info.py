@@ -25,33 +25,41 @@ def getSermonSeries(id):
 
 
 def getSermonTitle(id):
-    plan_items_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
-    r = requests.get(
-        plan_items_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
+    try:
+        plan_items_url = (
+            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
+        r = requests.get(
+            plan_items_url, 
+            auth=(tokens.APP_ID, tokens.SECRET)
+            )
+        body = json.loads(r.text)
 
-    for item in body['data']:
-        if (item['attributes']['title'] == 'Preaching of the Word'):
-            sermon_title = item['attributes']['description']  
-    return sermon_title
+        for item in body['data']:
+            if (item['attributes']['title'] == 'Preaching of the Word'):
+                sermon_title = item['attributes']['description']  
+        return sermon_title
+    except UnboundLocalError:
+        print('No sermon title defined in PCO')
+        return None
 
 
 def getSermonScripture(id):
-    plan_items_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
-    r = requests.get(
-        plan_items_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
+    try:
+        plan_items_url = (
+            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
+        r = requests.get(
+            plan_items_url, 
+            auth=(tokens.APP_ID, tokens.SECRET)
+            )
+        body = json.loads(r.text)
 
-    for item in body['data']:
-        if (item['attributes']['title'] == 'Reading of the Word'):
-            scripture = item['attributes']['description']
-    return scripture
+        for item in body['data']:
+            if (item['attributes']['title'] == 'Reading of the Word'):
+                scripture = item['attributes']['description']
+        return scripture
+    except UnboundLocalError:
+        print('No scripture defined in PCO')
+        return None
 
 
 def getSermonSpeaker(id):
@@ -114,7 +122,7 @@ def appendYoutubeID(sermon_title):
                 video_id = video['id']
                 return video_id
     except AttributeError:
-        print('No sermon title defined in PCO')
+        print('Cannot link youtube ID - no sermon title defined in PCO')
         return None
 
 
@@ -181,7 +189,7 @@ def getSermonInfo():
 
         # not a new sunday; update last sermon
         if today < (last_sermon_date_obj + timedelta(days=7)):
-            print(f"Retrieving last sermon \"{last_sermon['sermon_title']}\" on {last_sermon['date']} for update...")
+            print(f"No new sermons. Updating last sermon information for {last_sermon['date']}...")
             updated_sermon = updateLastSermon(last_sermon) 
             return updated_sermon
             
@@ -189,12 +197,12 @@ def getSermonInfo():
         else:
             # get new sunday sermon's info based on last sermon's next id
             new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
-            print(f"Retrieving new sermon information for {new_sunday_date}...")
+            print(f"Retrieving sermon information for {new_sunday_date}...")
             new_sermon = getNewSermon(last_sermon)
             return new_sermon
             
     # is empty
     else:
-        print("Databases is empty. Retrieving first sermon...")
+        print(f"Databases is empty. Retrieving first sermon information...")
         first_sermon_info = getFirstPlan()
         return first_sermon_info

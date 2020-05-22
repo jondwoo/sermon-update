@@ -2,9 +2,10 @@ import sermon_info
 import youtube
 import json
 import database
-import datetime
 import config
 import generatePage
+
+from datetime import datetime
 # import optparse
 
 # parser = optparse.OptionParser()
@@ -15,7 +16,7 @@ import generatePage
 
 if __name__ == "__main__":
     ## retrieve sermon info from API and insert to DB
-    # database.deleteAll(mydb)  # for testing
+    database.deleteAll()  # for testing
     # if options.update:
     #     date = options.update
     #     field = input('Which field would you like to update?\n'
@@ -41,13 +42,18 @@ if __name__ == "__main__":
     #         break
     # else:
     
-    print('Updating database...')
-    sermon = sermon_info.getSermonInfo()
-    if database.documentExists(sermon):
-        database.updateSermon(sermon)
-    else:
-        database.insertSermon(sermon)
-    print('')
+
+    while(True):
+        print(f'Current date: {datetime.today().date()}')
+        # output current date
+        sermon = sermon_info.getSermonInfo()
+        if database.documentExists(sermon):
+            database.updateSermon(sermon)
+            break
+        else:
+            database.insertSermon(sermon)
+        print('')
+
 
     ## auto generate page with configured number of rows and columns
     print('Updating page...')

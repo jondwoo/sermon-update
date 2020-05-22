@@ -27,6 +27,7 @@ def insertSermon(sermon):
     print(json.dumps(sermon,indent=2))
     col.insert_one(sermon)
     print(f"Inserted \"{sermon['sermon_title']}\"")
+    return True
         
 
 def deleteAll():
@@ -80,6 +81,7 @@ def updateSermon(sermon):
         } }
     col.update_one(my_query, new_values)
     print(f"Updated \"{sermon['sermon_title']}\"")
+    return True
 
 
 # def findByDate(date, field, value):
