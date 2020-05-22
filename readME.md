@@ -13,4 +13,5 @@ Requirements:
 
 TODO:
 * send alert for missing sermon fields
-* update web page with only valid video
+* fix col=3
+* add script options to handle sermon updates?
