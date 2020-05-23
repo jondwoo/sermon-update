@@ -16,7 +16,7 @@ from datetime import datetime
 
 if __name__ == "__main__":
     # retrieve sermon info from API and insert to DB
-    # database.deleteAll()  # for testing
+    database.deleteAll()  # for testing
     # if options.update:
     #     date = options.update
     #     field = input('Which field would you like to update?\n'
