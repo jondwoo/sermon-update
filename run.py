@@ -15,7 +15,7 @@ from datetime import datetime
 # options, args = parser.parse_args()
 
 if __name__ == "__main__":
-    ## retrieve sermon info from API and insert to DB
+    # retrieve sermon info from API and insert to DB
     # database.deleteAll()  # for testing
     # if options.update:
     #     date = options.update
@@ -41,7 +41,6 @@ if __name__ == "__main__":
     #     else:
     #         break
     # else:
-    
 
     while(True):
         print(f'Current date: {datetime.today().date()}')
@@ -52,9 +51,7 @@ if __name__ == "__main__":
         else:
             database.insertSermon(sermon)
         print('')
-
-
-    ## auto generate page with configured number of rows and columns
+    # auto generate page with configured number of rows and columns
     print('Updating page...')
     content = generatePage.generatePage()
     generatePage.updatePage('sermon_page.html', content)
