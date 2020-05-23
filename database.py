@@ -11,12 +11,6 @@ client = pymongo.MongoClient(f'mongodb+srv://{tokens.USERNAME}:{tokens.PASS}@clu
 db = client.nlpc
 col = db.sermons
 
-# def connectToDB():
-#     client = pymongo.MongoClient(f'mongodb+srv://{tokens.USERNAME}:{tokens.PASS}@cluster0-fmo1o.mongodb.net/test?retryWrites=true&w=majority')
-#     db = client.nlpc
-
-#     return db
-
 
 def getSermonCollection():
     return db.sermons
