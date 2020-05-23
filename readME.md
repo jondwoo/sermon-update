@@ -14,4 +14,3 @@ Requirements:
 TODO:
 * send alert for missing sermon fields
 * when ran, script should check all incomplete sermons to see if new fields available
-* check for guest speaker names next to sermon title PCO
