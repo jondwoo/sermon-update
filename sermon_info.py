@@ -1,46 +1,46 @@
+import os
+import re
 import requests
 import json
-import tokens
 import csv
+import tokens
 import youtube
-import os
 import database
+import PCO
 from datetime import datetime
 from datetime import timedelta
 
 
 def getSermonSeries(id):
     series_title = ''
-    plan_details_url = (
-        f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
-    r = requests.get(
-        plan_details_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
+    body = PCO.getPlanDetails(id)
 
-    if body['data']['attributes']['series_title'] != None:
+    if body['data']['attributes']['series_title'] == '' or body['data']['attributes']['series_title'] == None:
+        return ''
+    else:
         series_title = body['data']['attributes']['series_title']
     return series_title
 
 
 def getSermonTitle(id):
     try:
-        plan_items_url = (
-            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
-        r = requests.get(
-            plan_items_url, 
-            auth=(tokens.APP_ID, tokens.SECRET)
-        )
-        body = json.loads(r.text)
+        body = PCO.getPlanItems(id)
 
         for item in body['data']:
             if (item['attributes']['title'] == 'Preaching of the Word'):
-                sermon_title = item['attributes']['description']
-                if item['attributes']['description'] == '':
-                    # if blank return as None for query purposes
+                # if blank or null return as None for query purposes
+                if item['attributes']['description'] == '' or item['attributes']['description'] == None:
                     return None
-                return sermon_title
+                
+                # if guest speaker in string, only extract the title
+                try:
+                    substrings = re.search(r'(.*) \((.+?)\)', item['attributes']['description'])
+                    return substrings.group(1)
+                except AttributeError:
+                    # no guest speaker in string
+                    substrings = re.search(r'(.*)', item['attributes']['description'])
+                    return substrings.group(0)
+
     except UnboundLocalError:
         print('No sermon title defined in PCO')
         # must return as None for query purposes
@@ -49,13 +49,7 @@ def getSermonTitle(id):
 
 def getSermonScripture(id):
     try:
-        plan_items_url = (
-            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/items')
-        r = requests.get(
-            plan_items_url, 
-            auth=(tokens.APP_ID, tokens.SECRET)
-        )
-        body = json.loads(r.text)
+        body = PCO.getPlanItems(id)
 
         for item in body['data']:
             if (item['attributes']['title'] == 'Reading of the Word'):
@@ -71,37 +65,108 @@ def getSermonScripture(id):
 
 
 def getSermonSpeaker(id):
+    speaker = ''
     try:
-        plan_team_members_url = (
-            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/team_members')
-        r = requests.get(
-            plan_team_members_url, 
-            auth=(tokens.APP_ID, tokens.SECRET)
-        )
-        body = json.loads(r.text)
+        body = PCO.getPlanTeamMembers(id)
 
-        for item in body['data']:
-            if (item['attributes']['team_position_name'] == 'Preacher'):
-                speaker = item['attributes']['name']
-                # check if speaker is empty or null
-                if item['attributes']['name'] == None or item['attributes']['name'] == '':
-                        print('No speaker defined in PCO')
-                        speaker =  ''
-        return speaker
+        # no data available
+        if body['data'] == []:
+            print('Checking for speaker name in PCO sermon title...')
+            if checkSermonTitleForSpeaker(id) == '':
+                # if no speaker in sermon title, check series title
+                print('Checking for speaker name in PCO series title...')
+                if checkSeriesForSpeaker(id) == '':
+                    # no speaker exists
+                    print('No speaker defined in PCO')
+                    speaker =  ''
+                else:
+                    speaker = checkSeriesForSpeaker(id)
+            else:
+                speaker = checkSermonTitleForSpeaker(id)
+            return ''
+        else:        
+            for item in body['data']:
+                if (item['attributes']['team_position_name'] == 'Preacher'):
+                    speaker = item['attributes']['name']
+                    # if speaker is empty, check sermon title
+                    if item['attributes']['name'] == None or item['attributes']['name'] == '':
+                        print('Checking for speaker name in PCO sermon title...')
+                        if checkSermonTitleForSpeaker(id) == '':
+                            # if no speaker in sermon title, check series title
+                            print('Checking for speaker name in PCO series title...')
+                            if checkSeriesForSpeaker(id) == '':
+                                # no speaker exists
+                                print('No speaker defined in PCO')
+                                speaker =  ''
+                            else:
+                                speaker = checkSeriesForSpeaker(id)
+                        else:
+                            speaker = checkSermonTitleForSpeaker(id)
+                    return speaker
+            # "Preacher" entry does not exist, check sermon title
+            print('Checking for speaker name in PCO sermon title...')
+            if checkSermonTitleForSpeaker(id) == '':
+                # if no speaker in sermon title, check series title
+                print('Checking for speaker name in PCO series title...')
+                if checkSeriesForSpeaker(id) == '':
+                    # no speaker exists
+                    print('No speaker defined in PCO')
+                    speaker =  ''
+                else:
+                    speaker = checkSeriesForSpeaker(id)
+            else:
+                speaker = checkSermonTitleForSpeaker(id)
+            return speaker
     except UnboundLocalError:
         print('No speaker defined in PCO')
         return ''
     
 
+def checkSermonTitleForSpeaker(id):
+    try:
+        body = PCO.getPlanItems(id)
+
+        for item in body['data']:
+            if (item['attributes']['title'] == 'Preaching of the Word'):
+                # check if sermon title exists
+                if item['attributes']['description'] == '' or item['attributes']['description'] == None:
+                    return ''
+                else:
+                    # if sermon title not empty, check for guest speaker in string, only extract the speaker
+                    try:
+                        substrings = re.search(r'(.*) \((.+?)\)', item['attributes']['description'])
+                        return substrings.group(2)  # guest speaker name
+                    except AttributeError:
+                        # no guest speaker in string
+                        return ''
+
+    except UnboundLocalError:
+        print('No sermon title defined in PCO')
+        # must return as None for query purposes
+        return None
+
+
+def checkSeriesForSpeaker(id):
+    body = PCO.getPlanDetails(id)
+
+    # check if series title exists
+    if body['data']['attributes']['series_title'] == '' or body['data']['attributes']['series_title'] == None:
+        return ''
+    else:
+        # check if [Guest Speaker] as the series title
+        if body['data']['attributes']['series_title'] == '[Guest Speaker]':
+            # check if guest speaker name is listed
+            if body['data']['attributes']['title'] == '' or body['data']['attributes']['title'] == None:
+                return ''
+            else: 
+                return body['data']['attributes']['title']  # guest speaker name
+        else:
+            return ''
+
+
 def getSermonDate(id):
     try:
-        plan_details_url = (
-            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
-        r = requests.get(
-            plan_details_url, 
-            auth=(tokens.APP_ID, tokens.SECRET)
-        )
-        body = json.loads(r.text)
+        body = PCO.getPlanDetails(id)
 
         sermon_date = body['data']['attributes']['dates']
         #return as date object
@@ -114,13 +179,7 @@ def getSermonDate(id):
 
 def getSermonNextID(id):
     try:
-        plan_details_url = (
-            f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/')
-        r = requests.get(
-            plan_details_url, 
-            auth=(tokens.APP_ID, tokens.SECRET)
-        )
-        body = json.loads(r.text)
+        body = PCO.getPlanDetails(id)
 
         next_id = body['data']['relationships']['next_plan']['data']['id']
 
@@ -181,12 +240,7 @@ def getNewSermon(last_sermon):
 
 def getFirstPlan():
     # get all plans
-    plans_url = ('https://api.planningcenteronline.com/services/v2/service_types/764160/plans?offset=105/')
-    r = requests.get(
-        plans_url, 
-        auth=(tokens.APP_ID, tokens.SECRET)
-        )
-    body = json.loads(r.text)
+    body = PCO.getPlanList()
 
     first_sermon_info = {}
     plan_id = body['data'][0]['id']
