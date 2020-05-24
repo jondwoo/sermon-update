@@ -11,5 +11,6 @@ Requirements:
 * Check requirements.txt for dependencies
 
 TODO:
-* change update last sermon to update all sermons
 * send alert for missing sermon fields
+* test case: compare 'Holy Living Pt. 1' (PCO) == 'Holy Living: Part 1' (Youtube)
+    * currently retrieving this video by date, but it should be retrieved by title
