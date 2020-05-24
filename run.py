@@ -28,7 +28,7 @@ if __name__ == "__main__":
                 # update previous sermons
                 print(f"No new sermons. Updating all previous incomplete sermon information...")
                 print('')
-                database.updateDB()
+                database.updateIncompleteSermons()
                 break
 
     # auto generate page with configured number of rows and columns
