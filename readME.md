@@ -2,7 +2,6 @@
 
 Python script to automate NLPC's video sermon uploads<br><br>
 Note: 
-* ommitting "/watch?v=" in youtube_id
 * only the first sermon of a series will have sermon['series'] populated
 
 Requirements:
@@ -12,5 +11,5 @@ Requirements:
 * Check requirements.txt for dependencies
 
 TODO:
+* change update last sermon to update all sermons
 * send alert for missing sermon fields
-* when ran, script should check all incomplete sermons to see if new fields available

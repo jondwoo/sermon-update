@@ -24,7 +24,7 @@ def generatePage():
     for sermon in recent_sermons['data']:
         formatted_date = datetime.datetime.strptime(sermon['date'], '%Y-%m-%d').date().strftime('%B %d, %Y')
         try:
-            # at every config.col value, append to body and make a new row
+            # at every config.col value, make a new row
             if count != config.col:
                 sermon_body.append(
                     sermon_template
