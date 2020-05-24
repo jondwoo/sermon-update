@@ -21,6 +21,8 @@ def insertSermon(sermon):
     print(json.dumps(sermon,indent=2))
     col.insert_one(sermon)
     print(f"Inserted \"{sermon['sermon_title']}\"")
+    print('')
+
     return True
         
 
@@ -56,27 +58,51 @@ def findMostRecent():
         return sermon
 
 
-def documentExists(sermon):
-    cursor = db.sermons.find_one({"date": sermon['date']})
-    if (isinstance(cursor, dict)):
+def updateDB():
+    # retrieve all sermons with any null or '' values
+    cursor = col.find({ "$or": [
+        {'sermon_title': {'$in':[None, '']}}, 
+        {'scripture': {'$in': [None, '']}},
+        {'speaker': {'$in': [None, '' ]}},
+        {'date': {'$in': [ None, '']}},
+        { 'youtube_id': {'$in': [None, '']}}
+        ] })
+    
+
+    for incomplete_sermon in cursor:
+        print(f"Updating \"{incomplete_sermon['sermon_title']}\" for {incomplete_sermon['date']}...")
+        updated_sermon = sermon_info.updateSermonInformation(incomplete_sermon)
+        # pprint(updated_sermon)
+        # break
+
+        my_query = {'date': updated_sermon['date']}
+        new_values = {'$set': {
+            'series': updated_sermon['series'],
+            'sermon_title': updated_sermon['sermon_title'],
+            'scripture': updated_sermon['scripture'],
+            'speaker': updated_sermon['speaker'],
+            'date': updated_sermon['date'],
+            'youtube_id': updated_sermon['youtube_id']
+            }}
+        col.update_one(my_query, new_values)
+
+        # get updated sermon
+        cursor = col.find({'_id': incomplete_sermon['_id']})
+        # compare with old sermon
+        for sermon in cursor:
+            if str(incomplete_sermon) == str(sermon):
+                print(f"Nothing to update")
+            else:
+                print(f"Updated")
+        print('')
+
+
+def isEmpty():
+    last_sermon = findMostRecent()
+    if last_sermon == None:
         return True
     else:
         return False
-
-
-def updateSermon(sermon):
-    # update sermon info
-    my_query = { 'date': sermon['date'] }
-    new_values = { '$set': {
-        'series': sermon['series'],
-        'sermon_title': sermon['sermon_title'],
-        'scripture': sermon['scripture'],
-        'speaker': sermon['speaker'],
-        'youtube_id': sermon['youtube_id']
-        } }
-    col.update_one(my_query, new_values)
-    print(f"Updated \"{sermon['sermon_title']}\"")
-    return True
 
 
 # def findByDate(date, field, value):

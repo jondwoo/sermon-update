@@ -30,6 +30,7 @@ def getSermonTitle(id):
             if (item['attributes']['title'] == 'Preaching of the Word'):
                 # if blank or null return as None for query purposes
                 if item['attributes']['description'] == '' or item['attributes']['description'] == None:
+                    print('No sermon title defined in PCO')
                     return None
                 
                 # if guest speaker in string, only extract the title
@@ -194,8 +195,8 @@ def appendYoutubeID(sermon_title):
     youtube_resource = youtube.authenticateYoutubeAPI()
     nlpc_resource = youtube.getChannelResource(youtube_resource)
     video_list = youtube.getVideos(youtube_resource, nlpc_resource)
+    
     # populate sermon with youtube ID's from YOUTUBE API
-
     try:
         for video in video_list:
             if (video['title'].lower() == sermon_title.lower()):
@@ -206,19 +207,17 @@ def appendYoutubeID(sermon_title):
         return None
 
 
-def updateLastSermon(sermon):
+def updateSermonInformation(sermon):
     # grab latest id and re-populate the data
     sermon_info = {}
     sermon_info['series'] = getSermonSeries(sermon['plan_id'])
     sermon_info['sermon_title'] = getSermonTitle(sermon['plan_id'])
     sermon_info['scripture'] = getSermonScripture(sermon['plan_id'])
     sermon_info['speaker'] = getSermonSpeaker(sermon['plan_id'])
-
-    # dates and id will never change
-    sermon_info['date'] = sermon['date']
+    sermon_info['date'] = getSermonDate(sermon['plan_id']).strftime('%Y-%m-%d')
+    # IDs will never change
     sermon_info['plan_id'] = int(sermon['plan_id'])
     sermon_info['next_id'] = int(sermon['next_id'])
-
     sermon_info['youtube_id'] = appendYoutubeID(sermon_info['sermon_title'])
 
     return sermon_info
@@ -255,37 +254,35 @@ def getFirstPlan():
 
     return first_sermon_info
 
+def updateSermon():
+    pass
 
-def getSermonInfo():
-    # check if empty database
+def isNewSunday():
     last_sermon = database.findMostRecent()
-    if last_sermon != None:
-        # if it is a new sunday, get new info, else update last sermon's info
-        last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
-        today = datetime.today()
-
-        # not a new sunday; update last sermon
-        if today < (last_sermon_date_obj + timedelta(days=7)):
-            print(f"No new sermons. Updating last sermon information for {last_sermon['date']}...")
-            updated_sermon = updateLastSermon(last_sermon) 
-            return updated_sermon
-            
-        # is a new sunday
-        else:
-            # get new sunday sermon's info based on last sermon's next id
-            new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
-            print(f"Retrieving sermon information for {new_sunday_date}...")
-            new_sermon = getNewSermon(last_sermon)
-
-            # check new sunday date matches with current sunday date
-            if today == new_sermon['date']:
-                return new_sermon
-            else:
-                print('Sermon date not accurate')
-                return new_sermon
-            
-    # is empty
+    last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
+    today = datetime.today()
+    if today < (last_sermon_date_obj + timedelta(days=7)):
+        return False
     else:
-        print(f"Databases is empty. Retrieving first sermon information...")
+        return True
+
+def getSermonInfo(option):
+    if option == 'first':
         first_sermon_info = getFirstPlan()
         return first_sermon_info
+
+    elif option == 'new':
+        today = datetime.today()
+        last_sermon = database.findMostRecent()
+        last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
+        new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
+
+        print(f"Retrieving sermon information for {new_sunday_date}...")
+        new_sermon = getNewSermon(last_sermon)
+        # check new sermon's date matches with today's date
+        if today == new_sermon['date']:
+            return new_sermon
+        else:
+            print(f"Sermon date not accurate. Retrieved sermon date {new_sermon['date']}")
+            return new_sermon
+            
