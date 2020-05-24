@@ -58,7 +58,7 @@ def findMostRecent():
         return sermon
 
 
-def updateIncomplete():
+def updateIncompleteSermons():
     # retrieve all sermons with any null or '' values
     cursor = col.find({ "$or": [
         {'sermon_title': {'$in':[None, '']}}, 
