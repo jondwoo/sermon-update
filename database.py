@@ -58,7 +58,7 @@ def findMostRecent():
         return sermon
 
 
-def updateDB():
+def updateIncomplete():
     # retrieve all sermons with any null or '' values
     cursor = col.find({ "$or": [
         {'sermon_title': {'$in':[None, '']}}, 
@@ -66,7 +66,7 @@ def updateDB():
         {'speaker': {'$in': [None, '' ]}},
         {'date': {'$in': [ None, '']}},
         { 'youtube_id': {'$in': [None, '']}}
-        ] })
+        ] }).sort('date', pymongo.DESCENDING)
     
 
     for incomplete_sermon in cursor:
