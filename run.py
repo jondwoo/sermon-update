@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 database.insertSermon(new_sermon)
             else:
                 # update previous sermons
-                print(f"No new sermons. Updating all previous sermon information...")
+                print(f"No new sermons. Updating all previous incomplete sermon information...")
                 print('')
                 database.updateDB()
                 break
