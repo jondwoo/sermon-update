@@ -272,7 +272,7 @@ def getSermonInfo(option):
         return first_sermon_info
 
     elif option == 'new':
-        today = datetime.today()
+        today = datetime.today().strftime('%Y-%m-%d')
         last_sermon = database.findMostRecent()
         last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
         new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
