@@ -190,7 +190,7 @@ def getSermonNextID(id):
         return ''
 
 
-def appendYoutubeID(sermon_title):
+def appendYoutubeID(sermon):
     ## YOUTUBE
     youtube_resource = youtube.authenticateYoutubeAPI()
     nlpc_resource = youtube.getChannelResource(youtube_resource)
@@ -199,7 +199,8 @@ def appendYoutubeID(sermon_title):
     # populate sermon with youtube ID's from YOUTUBE API
     try:
         for video in video_list:
-            if (video['title'].lower() == sermon_title.lower()):
+            if (video['title'].lower() == sermon['sermon_title'].lower() or
+                video['upload_date'] == sermon['date']):
                 video_id = video['id']
                 return video_id
     except AttributeError:
@@ -218,7 +219,7 @@ def updateSermonInformation(sermon):
     # IDs will never change
     sermon_info['plan_id'] = int(sermon['plan_id'])
     sermon_info['next_id'] = int(sermon['next_id'])
-    sermon_info['youtube_id'] = appendYoutubeID(sermon_info['sermon_title'])
+    sermon_info['youtube_id'] = appendYoutubeID(sermon_info)
 
     return sermon_info
 
@@ -232,7 +233,7 @@ def getNewSermon(last_sermon):
     sermon_info['date'] = getSermonDate(last_sermon['next_id']).strftime('%Y-%m-%d')
     sermon_info['plan_id'] = int(last_sermon['next_id'])
     sermon_info['next_id'] = int(getSermonNextID(sermon_info['plan_id']))
-    sermon_info['youtube_id'] = appendYoutubeID(sermon_info['sermon_title'])
+    sermon_info['youtube_id'] = appendYoutubeID(sermon_info)
 
     return sermon_info
 
@@ -250,12 +251,10 @@ def getFirstPlan():
     first_sermon_info['date'] = datetime.strptime(body['data'][0]['attributes']['dates'], '%B %d, %Y').strftime('%Y-%m-%d')
     first_sermon_info['plan_id'] = int(plan_id)
     first_sermon_info['next_id'] = int(getSermonNextID(plan_id))
-    first_sermon_info['youtube_id'] = appendYoutubeID(first_sermon_info['sermon_title'])
+    first_sermon_info['youtube_id'] = appendYoutubeID(first_sermon_info)
 
     return first_sermon_info
 
-def updateSermon():
-    pass
 
 def isNewSunday():
     last_sermon = database.findMostRecent()

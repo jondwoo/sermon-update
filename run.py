@@ -33,5 +33,4 @@ if __name__ == "__main__":
 
     # auto generate page with configured number of rows and columns
     print('Updating page...')
-    content = generatePage.generatePage()
-    generatePage.updatePage('sermon_page.html', content)
+    content = generatePage.generatePage() 
