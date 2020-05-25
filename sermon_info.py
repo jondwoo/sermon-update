@@ -32,7 +32,7 @@ def getSermonTitle(id):
                 if item['attributes']['description'] == '' or item['attributes']['description'] == None:
                     print('No sermon title defined in PCO')
                     return None
-                
+
                 # if guest speaker in string, only extract the title
                 try:
                     substrings = re.search(r'(.*) \((.+?)\)', item['attributes']['description'])
@@ -85,7 +85,7 @@ def getSermonSpeaker(id):
             else:
                 speaker = checkSermonTitleForSpeaker(id)
             return ''
-        else:        
+        else:
             for item in body['data']:
                 if (item['attributes']['team_position_name'] == 'Preacher'):
                     speaker = item['attributes']['name']
@@ -121,7 +121,7 @@ def getSermonSpeaker(id):
     except UnboundLocalError:
         print('No speaker defined in PCO')
         return ''
-    
+
 
 def checkSermonTitleForSpeaker(id):
     try:
@@ -159,7 +159,7 @@ def checkSeriesForSpeaker(id):
             # check if guest speaker name is listed
             if body['data']['attributes']['title'] == '' or body['data']['attributes']['title'] == None:
                 return ''
-            else: 
+            else:
                 return body['data']['attributes']['title']  # guest speaker name
         else:
             return ''
@@ -195,7 +195,7 @@ def appendYoutubeID(sermon):
     youtube_resource = youtube.authenticateYoutubeAPI()
     nlpc_resource = youtube.getChannelResource(youtube_resource)
     video_list = youtube.getVideos(youtube_resource, nlpc_resource)
-    
+
     # populate sermon with youtube ID's from YOUTUBE API
     try:
         for video in video_list:
@@ -284,4 +284,4 @@ def getSermonInfo(option):
         else:
             print(f"Sermon date not accurate. Retrieved sermon date {new_sermon['date']}")
             return new_sermon
-            
+
