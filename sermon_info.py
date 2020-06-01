@@ -218,7 +218,7 @@ def updateSermonInformation(sermon):
     sermon_info['date'] = getSermonDate(sermon['plan_id']).strftime('%Y-%m-%d')
     # IDs will never change
     sermon_info['plan_id'] = int(sermon['plan_id'])
-    sermon_info['next_id'] = int(sermon['next_id'])
+    sermon_info['next_id'] = getSermonNextID(sermon['next_id'])
     sermon_info['youtube_id'] = appendYoutubeID(sermon_info)
 
     return sermon_info
@@ -266,18 +266,25 @@ def isNewSunday():
         return True
 
 def getSermonInfo(option):
+
+
     if option == 'first':
         first_sermon_info = getFirstPlan()
         return first_sermon_info
 
     elif option == 'new':
-        today = datetime.today().strftime('%Y-%m-%d')
+        # update last week's sermon first
+        print('Updating previous sermon...')
         last_sermon = database.findMostRecent()
-        last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
-        new_sunday_date = (last_sermon_date_obj + timedelta(days=7)).date()
+        updated_last_sermon = updateSermonInformation(last_sermon)
+
+        today = datetime.today().strftime('%Y-%m-%d')
+        updated_last_sermon = database.findMostRecent()
+        updated_last_sermon_date_obj = datetime.strptime(updated_last_sermon['date'], '%Y-%m-%d')
+        new_sunday_date = (updated_last_sermon_date_obj + timedelta(days=7)).date()
 
         print(f"Retrieving sermon information for {new_sunday_date}...")
-        new_sermon = getNewSermon(last_sermon)
+        new_sermon = getNewSermon(updated_last_sermon)
         # check new sermon's date matches with today's date
         if today == new_sermon['date']:
             return new_sermon
