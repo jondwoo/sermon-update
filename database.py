@@ -8,7 +8,7 @@ from pprint import pprint
 
 
 client = pymongo.MongoClient(
-    f"mongodb+srv://{tokens.USERNAME}:{tokens.PASS}@cluster0-fmo1o.mongodb.net/test?retryWrites=true&w=majority"
+    f"mongodb+srv://{tokens.USERNAME}:{tokens.PASS}@cluster0.fmo1o.gcp.mongodb.net/{tokens.DBNAME}?retryWrites=true&w=majority"
 )
 db = client.nlpc
 col = db.sermons
@@ -42,8 +42,6 @@ def get_sermon_list(limit_val):
         col.find(
             {
                 "sermon_title": {"$ne": None},
-                # "scripture": {'$ne': None},
-                # "speaker": {'$ne': None},
                 "date": {"$ne": None},
                 "youtube_id": {"$ne": None},
             }
@@ -55,18 +53,16 @@ def get_sermon_list(limit_val):
     for sermon in cursor:
         sermonList.append(sermon)
 
-    # pprint(sermon_dict)
     return sermonDict
 
 
 def find_most_recent():
     # check if collection has at least one document
     cursor = db.sermons.find().sort("date", pymongo.DESCENDING).limit(1)
-    for sermon in cursor:  # see if cursor.next() does the same thing
-        return sermon
+    return cursor
 
 
-def update_incomplete_sermons():
+def get_incomplete_sermons():
     # retrieve all sermons with any null or '' values
     cursor = col.find(
         {
@@ -79,19 +75,26 @@ def update_incomplete_sermons():
             ]
         }
     ).sort("date", pymongo.DESCENDING)
+    return cursor
 
-    if cursor.count() == 0:
-        print("Nothing to update")
+
+def is_empty():
+    cursor = find_most_recent()
+    if cursor.next() == None:
+        return True
     else:
-        for incompleteSermon in cursor:
-            print(
-                f"Updating \"{incompleteSermon['sermon_title']}\" for {incompleteSermon['date']}..."
-            )
-            updatedSermon = sermon_info.repopulate_current_sermon_info(incompleteSermon)
-            # pprint(updatedSermon)
-            # break
+        return False
 
-            myQuery = {"date": updatedSermon["date"]}
+
+def update_sermon(cursor):
+    if cursor.count() == 0:
+        print("No Sermons. Nothing to update")
+    else:
+        for sermon in cursor:
+            print(f"Updating \"{sermon['sermon_title']}\" for {sermon['date']}...")
+            updatedSermon = sermon_info.repopulate_current_sermon_info(sermon)
+
+            myQuery = {"date": sermon["date"]}
             newValues = {
                 "$set": {
                     "series": updatedSermon["series"],
@@ -105,19 +108,14 @@ def update_incomplete_sermons():
             col.update_one(myQuery, newValues)
 
             # get updated sermon
-            cursor = col.find({"_id": incompleteSermon["_id"]})
+            cursor = col.find({"_id": sermon["_id"]})
+
             # compare with old sermon
-            for sermon in cursor:
-                if str(incompleteSermon) == str(sermon):
-                    print(f"Nothing to update")
-                else:
-                    print(f"Updated")
+            if str(sermon) == str(cursor.next()):
+                print(f"Nothing to update")
+            else:
+                print(f"Updated")
             print("")
 
-
-def is_empty():
-    lastSermon = find_most_recent()
-    if lastSermon == None:
-        return True
-    else:
-        return False
+    currentSermon = find_most_recent().next()
+    return currentSermon

@@ -235,11 +235,6 @@ def append_youtube_id(sermon):
         return None
 
 
-# make these method names descriptive so that i know exactly what is happening in this
-# method without having to look at the method.  right now, it sounds like it's updating
-# something, but looking at this method, i don't see any updates happening,but only populating
-
-
 def repopulate_current_sermon_info(currentSermon):
     # get latest id and re-populate the data
     updatedCurrentSermon = {}
@@ -293,7 +288,7 @@ def get_initial_sermon_info():
 
 
 def is_new_sunday():
-    currentSermon = database.find_most_recent()
+    currentSermon = database.find_most_recent().next()
     currentSermonDateObj = datetime.strptime(currentSermon["date"], "%Y-%m-%d")
     today = datetime.today()
     if today < (currentSermonDateObj + timedelta(days=7)):
@@ -301,28 +296,20 @@ def is_new_sunday():
     return True
 
 
-def get_sermon(isInitial):
+def get_new_sermon(isInitial=False):
 
     if isInitial:
         initialSermon = get_initial_sermon_info()
         return initialSermon
-
     else:
-        # update last week's sermon first
-        print("Updating previous sermon...")
-        currentSermon = database.find_most_recent()
-        updatedCurrentSermon = repopulate_current_sermon_info(currentSermon)
-        # TO DO: update database after populating object
-
         today = datetime.today().strftime("%Y-%m-%d")
-        updatedCurrentSermon = database.find_most_recent()
-        updatedCurrentSermonDateObj = datetime.strptime(
-            updatedCurrentSermon["date"], "%Y-%m-%d"
-        )
-        newSundayDate = (updatedCurrentSermonDateObj + timedelta(days=7)).date()
+        currentSermon = database.find_most_recent().next()
+
+        currentSermonDateObj = datetime.strptime(currentSermon["date"], "%Y-%m-%d")
+        newSundayDate = (currentSermonDateObj + timedelta(days=7)).date()
 
         print(f"Retrieving sermon information for {newSundayDate}...")
-        newSermon = populate_new_sermon_info(updatedCurrentSermon)
+        newSermon = populate_new_sermon_info(currentSermon)
         # check new sermon's date matches with today's date
         if today == newSermon["date"]:
             return newSermon

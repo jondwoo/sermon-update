@@ -5,3 +5,4 @@ test.py
 *.pyc
 *copy.html
 sample_data.txt
+__pycache__/
