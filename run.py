@@ -32,8 +32,8 @@ if __name__ == "__main__":
                     f"No new sermons. Updating all previous incomplete sermon information..."
                 )
                 print("")
-                incompleteSermons = database.get_incomplete_sermons()
-                database.update_sermon(incompleteSermons)
+                incompleteSermonCursor = database.get_incomplete_sermons()
+                database.update_sermon(incompleteSermonCursor)
                 break
 
     # auto generate page with configured number of rows and columns
