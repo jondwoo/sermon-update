@@ -235,33 +235,25 @@ def append_youtube_id(sermon):
         return None
 
 
-def repopulate_current_sermon_info(currentSermon):
-    # get latest id and re-populate the data
-    updatedCurrentSermon = {}
-    updatedCurrentSermon["series"] = get_sermon_series(currentSermon["plan_id"])
-    updatedCurrentSermon["sermon_title"] = get_sermon_title(currentSermon["plan_id"])
-    updatedCurrentSermon["scripture"] = get_sermon_scriptures(currentSermon["plan_id"])
-    updatedCurrentSermon["speaker"] = get_sermon_speaker(currentSermon["plan_id"])
-    updatedCurrentSermon["date"] = get_sermon_date(currentSermon["plan_id"]).strftime(
-        "%Y-%m-%d"
-    )
-    updatedCurrentSermon["plan_id"] = int(currentSermon["plan_id"])
-    updatedCurrentSermon["next_id"] = int(get_sermon_next_id(currentSermon["next_id"]))
-    updatedCurrentSermon["youtube_id"] = append_youtube_id(currentSermon)
-
-    return updatedCurrentSermon
+def determine_sermon_id(isNew, sermon):
+    if isNew:
+        id = sermon["next_id"]
+    else:
+        id = sermon["plan_id"]
+    return id
 
 
-# populate obj with the following weeks info
-def populate_new_sermon_info(currentSermon):
+def populate_sermon_info(sermon, isNew=False):
+    id = determine_sermon_id(isNew, sermon)
+
     newSermon = {}
-    newSermon["series"] = get_sermon_series(currentSermon["next_id"])
-    newSermon["sermon_title"] = get_sermon_title(currentSermon["next_id"])
-    newSermon["scripture"] = get_sermon_scriptures(currentSermon["next_id"])
-    newSermon["speaker"] = get_sermon_speaker(currentSermon["next_id"])
-    newSermon["date"] = get_sermon_date(currentSermon["next_id"]).strftime("%Y-%m-%d")
-    newSermon["plan_id"] = int(currentSermon["next_id"])
-    newSermon["next_id"] = int(get_sermon_next_id(newSermon["plan_id"]))
+    newSermon["series"] = get_sermon_series(id)
+    newSermon["sermon_title"] = get_sermon_title(id)
+    newSermon["scripture"] = get_sermon_scriptures(id)
+    newSermon["speaker"] = get_sermon_speaker(id)
+    newSermon["date"] = get_sermon_date(id).strftime("%Y-%m-%d")
+    newSermon["plan_id"] = int(id)
+    newSermon["next_id"] = int(get_sermon_next_id(id))
     newSermon["youtube_id"] = append_youtube_id(newSermon)
 
     return newSermon
@@ -297,19 +289,17 @@ def is_new_sunday():
 
 
 def get_new_sermon(isInitial=False):
-
     if isInitial:
         initialSermon = get_initial_sermon_info()
         return initialSermon
     else:
         today = datetime.today().strftime("%Y-%m-%d")
         currentSermon = database.find_most_recent().next()
-
         currentSermonDateObj = datetime.strptime(currentSermon["date"], "%Y-%m-%d")
         newSundayDate = (currentSermonDateObj + timedelta(days=7)).date()
 
         print(f"Retrieving sermon information for {newSundayDate}...")
-        newSermon = populate_new_sermon_info(currentSermon)
+        newSermon = populate_sermon_info(currentSermon, True)
         # check new sermon's date matches with today's date
         if today == newSermon["date"]:
             return newSermon

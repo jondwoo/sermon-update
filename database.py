@@ -92,7 +92,7 @@ def update_sermon(cursor):
     else:
         for sermon in cursor:
             print(f"Updating \"{sermon['sermon_title']}\" for {sermon['date']}...")
-            updatedSermon = sermon_info.repopulate_current_sermon_info(sermon)
+            updatedSermon = sermon_info.populate_sermon_info(sermon)
 
             myQuery = {"date": sermon["date"]}
             newValues = {
