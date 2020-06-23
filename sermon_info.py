@@ -4,295 +4,331 @@ import requests
 import json
 import csv
 import tokens
-import youtube
 import database
 import PCO
+import youtube
 from datetime import datetime
 from datetime import timedelta
 
 
-def getSermonSeries(id):
-    series_title = ''
-    body = PCO.getPlanDetails(id)
+def get_sermon_series(id):
+    seriesTitle = ""
+    body = PCO.get_plan_details(id)
 
-    if body['data']['attributes']['series_title'] == '' or body['data']['attributes']['series_title'] == None:
-        return ''
+    if (
+        body["data"]["attributes"]["series_title"] == ""
+        or body["data"]["attributes"]["series_title"] == None
+    ):
+        return ""
     else:
-        series_title = body['data']['attributes']['series_title']
-    return series_title
+        seriesTitle = body["data"]["attributes"]["series_title"]
+    return seriesTitle
 
 
-def getSermonTitle(id):
+def get_sermon_title(id):
     try:
-        body = PCO.getPlanItems(id)
+        body = PCO.get_plan_items(id)
 
-        for item in body['data']:
-            if (item['attributes']['title'] == 'Preaching of the Word'):
+        for item in body["data"]:
+            if item["attributes"]["title"] == "Preaching of the Word":
                 # if blank or null return as None for query purposes
-                if item['attributes']['description'] == '' or item['attributes']['description'] == None:
-                    print('No sermon title defined in PCO')
+                if (
+                    item["attributes"]["description"] == ""
+                    or item["attributes"]["description"] == None
+                ):
+                    print("No sermon title defined in PCO")
                     return None
 
                 # if guest speaker in string, only extract the title
                 try:
-                    substrings = re.search(r'(.*) \((.+?)\)', item['attributes']['description'])
+                    substrings = re.search(
+                        r"(.*) \((.+?)\)", item["attributes"]["description"]
+                    )
                     return substrings.group(1)
                 except AttributeError:
                     # no guest speaker in string
-                    substrings = re.search(r'(.*)', item['attributes']['description'])
+                    substrings = re.search(r"(.*)", item["attributes"]["description"])
                     return substrings.group(0)
 
     except UnboundLocalError:
-        print('No sermon title defined in PCO')
+        print("No sermon title defined in PCO")
         # must return as None for query purposes
         return None
 
 
-def getSermonScripture(id):
+def get_sermon_scriptures(id):
     try:
-        body = PCO.getPlanItems(id)
+        body = PCO.get_plan_items(id)
 
-        for item in body['data']:
-            if (item['attributes']['title'] == 'Reading of the Word'):
-                scripture = item['attributes']['description']
+        for item in body["data"]:
+            if item["attributes"]["title"] == "Reading of the Word":
+                scripture = item["attributes"]["description"]
                 # check if scripture is empty or null
-                if item['attributes']['description'] == None or item['attributes']['description'] == '':
-                    print('No scripture defined in PCO')
-                    scripture =  ''
+                if (
+                    item["attributes"]["description"] == None
+                    or item["attributes"]["description"] == ""
+                ):
+                    print("No scripture defined in PCO")
+                    scripture = ""
         return scripture
     except UnboundLocalError:
-        print('No scripture defined in PCO')
-        return ''
+        print("No scripture defined in PCO")
+        return ""
 
 
-def getSermonSpeaker(id):
-    speaker = ''
+def get_sermon_speaker(id):
+    speaker = ""
     try:
-        body = PCO.getPlanTeamMembers(id)
+        body = PCO.get_plan_team_members(id)
 
         # no data available
-        if body['data'] == []:
-            print('Checking for speaker name in PCO sermon title...')
-            if checkSermonTitleForSpeaker(id) == '':
+        if body["data"] == []:
+            print("Checking for speaker name in PCO sermon title...")
+            if check_pco_sermon_title_for_speaker(id) == "":
                 # if no speaker in sermon title, check series title
-                print('Checking for speaker name in PCO series title...')
-                if checkSeriesForSpeaker(id) == '':
+                print("Checking for speaker name in PCO series title...")
+                if check_pco_series_for_speaker(id) == "":
                     # no speaker exists
-                    print('No speaker defined in PCO')
-                    speaker =  ''
+                    print("No speaker defined in PCO")
+                    speaker = ""
                 else:
-                    speaker = checkSeriesForSpeaker(id)
+                    speaker = check_pco_series_for_speaker(id)
             else:
-                speaker = checkSermonTitleForSpeaker(id)
-            return ''
+                speaker = check_pco_sermon_title_for_speaker(id)
+            return ""
         else:
-            for item in body['data']:
-                if (item['attributes']['team_position_name'] == 'Preacher'):
-                    speaker = item['attributes']['name']
+            for item in body["data"]:
+                if item["attributes"]["team_position_name"] == "Preacher":
+                    speaker = item["attributes"]["name"]
                     # if speaker is empty, check sermon title
-                    if item['attributes']['name'] == None or item['attributes']['name'] == '':
-                        print('Checking for speaker name in PCO sermon title...')
-                        if checkSermonTitleForSpeaker(id) == '':
+                    if (
+                        item["attributes"]["name"] == None
+                        or item["attributes"]["name"] == ""
+                    ):
+                        print("Checking for speaker name in PCO sermon title...")
+                        if check_pco_sermon_title_for_speaker(id) == "":
                             # if no speaker in sermon title, check series title
-                            print('Checking for speaker name in PCO series title...')
-                            if checkSeriesForSpeaker(id) == '':
+                            print("Checking for speaker name in PCO series title...")
+                            if check_pco_series_for_speaker(id) == "":
                                 # no speaker exists
-                                print('No speaker defined in PCO')
-                                speaker =  ''
+                                print("No speaker defined in PCO")
+                                speaker = ""
                             else:
-                                speaker = checkSeriesForSpeaker(id)
+                                speaker = check_pco_series_for_speaker(id)
                         else:
-                            speaker = checkSermonTitleForSpeaker(id)
+                            speaker = check_pco_sermon_title_for_speaker(id)
                     return speaker
             # "Preacher" entry does not exist, check sermon title
-            print('Checking for speaker name in PCO sermon title...')
-            if checkSermonTitleForSpeaker(id) == '':
+            print("Checking for speaker name in PCO sermon title...")
+            if check_pco_sermon_title_for_speaker(id) == "":
                 # if no speaker in sermon title, check series title
-                print('Checking for speaker name in PCO series title...')
-                if checkSeriesForSpeaker(id) == '':
+                print("Checking for speaker name in PCO series title...")
+                if check_pco_series_for_speaker(id) == "":
                     # no speaker exists
-                    print('No speaker defined in PCO')
-                    speaker =  ''
+                    print("No speaker defined in PCO")
+                    speaker = ""
                 else:
-                    speaker = checkSeriesForSpeaker(id)
+                    speaker = check_pco_series_for_speaker(id)
             else:
-                speaker = checkSermonTitleForSpeaker(id)
+                speaker = check_pco_sermon_title_for_speaker(id)
             return speaker
     except UnboundLocalError:
-        print('No speaker defined in PCO')
-        return ''
+        print("No speaker defined in PCO")
+        return ""
 
 
-def checkSermonTitleForSpeaker(id):
+def check_pco_sermon_title_for_speaker(id):
     try:
-        body = PCO.getPlanItems(id)
+        body = PCO.get_plan_items(id)
 
-        for item in body['data']:
-            if (item['attributes']['title'] == 'Preaching of the Word'):
+        for item in body["data"]:
+            if item["attributes"]["title"] == "Preaching of the Word":
                 # check if sermon title exists
-                if item['attributes']['description'] == '' or item['attributes']['description'] == None:
-                    return ''
+                if (
+                    item["attributes"]["description"] == ""
+                    or item["attributes"]["description"] == None
+                ):
+                    return ""
                 else:
                     # if sermon title not empty, check for guest speaker in string, only extract the speaker
                     try:
-                        substrings = re.search(r'(.*) \((.+?)\)', item['attributes']['description'])
+                        substrings = re.search(
+                            r"(.*) \((.+?)\)", item["attributes"]["description"]
+                        )
                         return substrings.group(2)  # guest speaker name
                     except AttributeError:
                         # no guest speaker in string
-                        return ''
+                        return ""
 
     except UnboundLocalError:
-        print('No sermon title defined in PCO')
+        print("No sermon title defined in PCO")
         # must return as None for query purposes
         return None
 
 
-def checkSeriesForSpeaker(id):
-    body = PCO.getPlanDetails(id)
+def check_pco_series_for_speaker(id):
+    body = PCO.get_plan_details(id)
 
     # check if series title exists
-    if body['data']['attributes']['series_title'] == '' or body['data']['attributes']['series_title'] == None:
-        return ''
+    if (
+        body["data"]["attributes"]["series_title"] == ""
+        or body["data"]["attributes"]["series_title"] == None
+    ):
+        return ""
     else:
         # check if [Guest Speaker] as the series title
-        if body['data']['attributes']['series_title'] == '[Guest Speaker]':
+        if body["data"]["attributes"]["series_title"] == "[Guest Speaker]":
             # check if guest speaker name is listed
-            if body['data']['attributes']['title'] == '' or body['data']['attributes']['title'] == None:
-                return ''
+            if (
+                body["data"]["attributes"]["title"] == ""
+                or body["data"]["attributes"]["title"] == None
+            ):
+                return ""
             else:
-                return body['data']['attributes']['title']  # guest speaker name
+                return body["data"]["attributes"]["title"]  # guest speaker name
         else:
-            return ''
+            return ""
 
 
-def getSermonDate(id):
+def get_sermon_date(id):
     try:
-        body = PCO.getPlanDetails(id)
+        body = PCO.get_plan_details(id)
 
-        sermon_date = body['data']['attributes']['dates']
-        #return as date object
-        sermon_date =  datetime.strptime(sermon_date, '%B %d, %Y').date()
+        sermon_date = body["data"]["attributes"]["dates"]
+        # return as date object
+        sermon_date = datetime.strptime(sermon_date, "%B %d, %Y").date()
         return sermon_date
     except UnboundLocalError:
-        print('No date defined in PCO')
+        print("No date defined in PCO")
         return None
 
 
-def getSermonNextID(id):
+def get_sermon_next_id(id):
     try:
-        body = PCO.getPlanDetails(id)
+        body = PCO.get_plan_details(id)
 
-        next_id = body['data']['relationships']['next_plan']['data']['id']
+        next_id = body["data"]["relationships"]["next_plan"]["data"]["id"]
 
         return next_id
     except UnboundLocalError:
-        print('No next sermon ID defined in PCO')
-        return ''
+        print("No next sermon ID defined in PCO")
+        return ""
 
 
-def appendYoutubeID(sermon):
+def append_youtube_id(sermon):
     ## YOUTUBE
-    youtube_resource = youtube.authenticateYoutubeAPI()
-    nlpc_resource = youtube.getChannelResource(youtube_resource)
-    video_list = youtube.getVideos(youtube_resource, nlpc_resource)
+    youtubeResource = youtube.authenticateYoutubeAPI()
+    nlpcResource = youtube.getChannelResource(youtubeResource)
+    videoList = youtube.getVideos(youtubeResource, nlpcResource)
 
     # populate sermon with youtube ID's from YOUTUBE API
     try:
-        for video in video_list:
-            if (video['title'].lower() == sermon['sermon_title'].lower() or
-                video['upload_date'] == sermon['date']):
-                video_id = video['id']
-                return video_id
+        for video in videoList:
+            if (
+                video["title"].lower() == sermon["sermon_title"].lower()
+                or video["upload_date"] == sermon["date"]
+            ):
+                videoId = video["id"]
+                return videoId
     except AttributeError:
-        print('Cannot link youtube ID')
+        print("Cannot link youtube ID")
         return None
+
 
 # make these method names descriptive so that i know exactly what is happening in this
 # method without having to look at the method.  right now, it sounds like it's updating
 # something, but looking at this method, i don't see any updates happening,but only populating
 
-def updateSermonInformation(sermon):
-    # grab latest id and re-populate the data
-    sermon_info = {}
-    sermon_info['series'] = getSermonSeries(sermon['plan_id'])
-    sermon_info['sermon_title'] = getSermonTitle(sermon['plan_id'])
-    sermon_info['scripture'] = getSermonScripture(sermon['plan_id'])
-    sermon_info['speaker'] = getSermonSpeaker(sermon['plan_id'])
-    sermon_info['date'] = getSermonDate(sermon['plan_id']).strftime('%Y-%m-%d')
-    # IDs will never change
-    sermon_info['plan_id'] = int(sermon['plan_id'])
-    sermon_info['next_id'] = getSermonNextID(sermon['next_id'])
-    sermon_info['youtube_id'] = appendYoutubeID(sermon_info)
 
-    return sermon_info
+def repopulate_current_sermon_info(currentSermon):
+    # get latest id and re-populate the data
+    updatedCurrentSermon = {}
+    updatedCurrentSermon["series"] = get_sermon_series(currentSermon["plan_id"])
+    updatedCurrentSermon["sermon_title"] = get_sermon_title(currentSermon["plan_id"])
+    updatedCurrentSermon["scripture"] = get_sermon_scriptures(currentSermon["plan_id"])
+    updatedCurrentSermon["speaker"] = get_sermon_speaker(currentSermon["plan_id"])
+    updatedCurrentSermon["date"] = get_sermon_date(currentSermon["plan_id"]).strftime(
+        "%Y-%m-%d"
+    )
+    updatedCurrentSermon["plan_id"] = int(currentSermon["plan_id"])
+    updatedCurrentSermon["next_id"] = int(get_sermon_next_id(currentSermon["next_id"]))
+    updatedCurrentSermon["youtube_id"] = append_youtube_id(currentSermon)
+
+    return updatedCurrentSermon
+
 
 # populate obj with the following weeks info
-def getNewSermon(last_sermon):
-    sermon_info = {}
-    sermon_info['series'] = getSermonSeries(last_sermon['next_id'])
-    sermon_info['sermon_title'] = getSermonTitle(last_sermon['next_id'])
-    sermon_info['scripture'] = getSermonScripture(last_sermon['next_id'])
-    sermon_info['speaker'] = getSermonSpeaker(last_sermon['next_id'])
-    sermon_info['date'] = getSermonDate(last_sermon['next_id']).strftime('%Y-%m-%d')
-    sermon_info['plan_id'] = int(last_sermon['next_id'])
-    sermon_info['next_id'] = int(getSermonNextID(sermon_info['plan_id']))
-    sermon_info['youtube_id'] = appendYoutubeID(sermon_info)
+def populate_new_sermon_info(currentSermon):
+    newSermon = {}
+    newSermon["series"] = get_sermon_series(currentSermon["next_id"])
+    newSermon["sermon_title"] = get_sermon_title(currentSermon["next_id"])
+    newSermon["scripture"] = get_sermon_scriptures(currentSermon["next_id"])
+    newSermon["speaker"] = get_sermon_speaker(currentSermon["next_id"])
+    newSermon["date"] = get_sermon_date(currentSermon["next_id"]).strftime("%Y-%m-%d")
+    newSermon["plan_id"] = int(currentSermon["next_id"])
+    newSermon["next_id"] = int(get_sermon_next_id(newSermon["plan_id"]))
+    newSermon["youtube_id"] = append_youtube_id(newSermon)
 
-    return sermon_info
+    return newSermon
 
 
-def getFirstPlan():
+def get_initial_sermon_info():
     # get all plans
-    body = PCO.getPlanList()
+    body = PCO.get_plan_list()
 
-    first_sermon_info = {}
-    plan_id = body['data'][0]['id']
-    first_sermon_info['series'] = getSermonSeries(plan_id)
-    first_sermon_info['sermon_title'] = getSermonTitle(plan_id)
-    first_sermon_info['scripture'] = getSermonScripture(plan_id)
-    first_sermon_info['speaker'] = getSermonSpeaker(plan_id)
-    first_sermon_info['date'] = datetime.strptime(body['data'][0]['attributes']['dates'], '%B %d, %Y').strftime('%Y-%m-%d')
-    first_sermon_info['plan_id'] = int(plan_id)
-    first_sermon_info['next_id'] = int(getSermonNextID(plan_id))
-    first_sermon_info['youtube_id'] = appendYoutubeID(first_sermon_info)
+    initialSermon = {}
+    plan_id = body["data"][0]["id"]
+    initialSermon["series"] = get_sermon_series(plan_id)
+    initialSermon["sermon_title"] = get_sermon_title(plan_id)
+    initialSermon["scripture"] = get_sermon_scriptures(plan_id)
+    initialSermon["speaker"] = get_sermon_speaker(plan_id)
+    initialSermon["date"] = datetime.strptime(
+        body["data"][0]["attributes"]["dates"], "%B %d, %Y"
+    ).strftime("%Y-%m-%d")
+    initialSermon["plan_id"] = int(plan_id)
+    initialSermon["next_id"] = int(get_sermon_next_id(plan_id))
+    initialSermon["youtube_id"] = append_youtube_id(initialSermon)
 
-    return first_sermon_info
+    return initialSermon
 
 
-def isNewSunday():
-    last_sermon = database.findMostRecent()
-    last_sermon_date_obj = datetime.strptime(last_sermon['date'], '%Y-%m-%d')
+def is_new_sunday():
+    currentSermon = database.find_most_recent()
+    currentSermonDateObj = datetime.strptime(currentSermon["date"], "%Y-%m-%d")
     today = datetime.today()
-    if today < (last_sermon_date_obj + timedelta(days=7)):
+    if today < (currentSermonDateObj + timedelta(days=7)):
         return False
     return True
 
-def getSermonInfo(is_first):
 
-    if is_first:
-        first_sermon_info = getFirstPlan()
-        return first_sermon_info
+def get_sermon(isInitial):
+
+    if isInitial:
+        initialSermon = get_initial_sermon_info()
+        return initialSermon
 
     else:
         # update last week's sermon first
+        print("Updating previous sermon...")
+        currentSermon = database.find_most_recent()
+        updatedCurrentSermon = repopulate_current_sermon_info(currentSermon)
         # TO DO: update database after populating object
-        print('Updating previous sermon...')
-        last_sermon = database.findMostRecent()
-        updated_last_sermon = updateSermonInformation(last_sermon)
 
+        today = datetime.today().strftime("%Y-%m-%d")
+        updatedCurrentSermon = database.find_most_recent()
+        updatedCurrentSermonDateObj = datetime.strptime(
+            updatedCurrentSermon["date"], "%Y-%m-%d"
+        )
+        newSundayDate = (updatedCurrentSermonDateObj + timedelta(days=7)).date()
 
-
-        today = datetime.today().strftime('%Y-%m-%d')
-        updated_last_sermon = database.findMostRecent()
-        updated_last_sermon_date_obj = datetime.strptime(updated_last_sermon['date'], '%Y-%m-%d')
-        new_sunday_date = (updated_last_sermon_date_obj + timedelta(days=7)).date()
-
-        print(f"Retrieving sermon information for {new_sunday_date}...")
-        new_sermon = getNewSermon(updated_last_sermon)
+        print(f"Retrieving sermon information for {newSundayDate}...")
+        newSermon = populate_new_sermon_info(updatedCurrentSermon)
         # check new sermon's date matches with today's date
-        if today == new_sermon['date']:
-            return new_sermon
+        if today == newSermon["date"]:
+            return newSermon
         else:
-            print(f"Sermon date not accurate. Retrieved sermon date {new_sermon['date']}")
-            return new_sermon
+            print(
+                f"Sermon date not accurate. Retrieved sermon date {newSermon['date']}"
+            )
+            return newSermon
 

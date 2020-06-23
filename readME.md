@@ -7,6 +7,8 @@ Note:
 
 Requirements:
 
+- Python 3.8 or higher
+- pip3
 - Get personal token from PCO and api key from youtube API
   - `https://api.planningcenteronline.com/oauth/applications`
   - `https://developers.google.com/youtube/v3/docs`
