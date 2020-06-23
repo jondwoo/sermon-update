@@ -207,6 +207,9 @@ def appendYoutubeID(sermon):
         print('Cannot link youtube ID')
         return None
 
+# make these method names descriptive so that i know exactly what is happening in this
+# method without having to look at the method.  right now, it sounds like it's updating
+# something, but looking at this method, i don't see any updates happening,but only populating
 
 def updateSermonInformation(sermon):
     # grab latest id and re-populate the data
@@ -223,7 +226,7 @@ def updateSermonInformation(sermon):
 
     return sermon_info
 
-
+# populate obj with the following weeks info
 def getNewSermon(last_sermon):
     sermon_info = {}
     sermon_info['series'] = getSermonSeries(last_sermon['next_id'])
@@ -262,21 +265,22 @@ def isNewSunday():
     today = datetime.today()
     if today < (last_sermon_date_obj + timedelta(days=7)):
         return False
-    else:
-        return True
+    return True
 
-def getSermonInfo(option):
+def getSermonInfo(is_first):
 
-
-    if option == 'first':
+    if is_first:
         first_sermon_info = getFirstPlan()
         return first_sermon_info
 
-    elif option == 'new':
+    else:
         # update last week's sermon first
+        # TO DO: update database after populating object
         print('Updating previous sermon...')
         last_sermon = database.findMostRecent()
         updated_last_sermon = updateSermonInformation(last_sermon)
+
+
 
         today = datetime.today().strftime('%Y-%m-%d')
         updated_last_sermon = database.findMostRecent()
