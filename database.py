@@ -55,7 +55,7 @@ def getSermonList(limit_val):
 def findMostRecent():
     # check if collection has at least one document
     cursor = db.sermons.find().sort('date', pymongo.DESCENDING).limit(1)
-    for sermon in cursor:
+    for sermon in cursor:  # see if cursor.next() does the same thing
         return sermon
 
 

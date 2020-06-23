@@ -35,12 +35,16 @@ def getPlanItems(id):
     return body
 
 def getPlanTeamMembers(id):
-    plan_team_members_url = (
+    url = (
         f'https://api.planningcenteronline.com/services/v2/service_types/764160/plans/{id}/team_members')
+    return _call_pco(plan_team_members_url)
+
+
+def _call_pco(url):
     r = requests.get(
-        plan_team_members_url, 
+        url,
         auth=(tokens.APP_ID, tokens.SECRET)
     )
-    body = json.loads(r.text)
-
-    return body
+    if r.status_code == 200:
+        return json.loads(r.text)
+    return None
