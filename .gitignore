@@ -6,3 +6,8 @@ test.py
 *copy.html
 sample_data.txt
 __pycache__/
+.firebase/
+.firebaserc
+firebase.json
+functions/
+public/
