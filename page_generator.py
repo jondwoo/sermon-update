@@ -7,7 +7,7 @@ from pprint import pprint
 
 pageTemplatePath = "/templates/page-template.html"
 sermonTemplatePath = "/templates/sermon-template.html"
-sermonPagePath = "/sermon_page.html"
+sermonPagePath = "/sermons.html"
 
 
 def get_file(filename):
