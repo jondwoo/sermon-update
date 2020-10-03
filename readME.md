@@ -1,21 +1,72 @@
-## Video Sermon Auto Upload
+<!--
+*** Thanks for checking out this README Template. If you have a suggestion that would
+*** make this better, please fork the repo and create a pull request or simply open
+*** an issue with the tag "enhancement".
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-Python script to automate NLPC's video sermon uploads<br><br>
-Note:
 
-- only the first sermon of a series will have sermon['series'] populated
+<!-- TABLE OF CONTENTS -->
+## Table of Contents
 
-Requirements:
+* [About the Project](#about-the-project)
+  * [Built With](#built-with)
+* [Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+* [Roadmap](#roadmap)
+* [License](#license)
+* [Contact](#contact)
+* [Acknowledgements](#acknowledgements)
 
-- Python 3.8 or higher
-- pip3
-- Get personal token from PCO and api key from youtube API
-  - `https://api.planningcenteronline.com/oauth/applications`
-  - `https://developers.google.com/youtube/v3/docs`
-- Check requirements.txt for dependencies
 
-TODO:
 
-- send alert for missing sermon fields
-- test case: compare 'Holy Living Pt. 1' (PCO) == 'Holy Living: Part 1' (Youtube)
-  - currently retrieving this video by title and date
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+Python script to manage weekly sermon uploads for New Life Presbyterian Church
+
+Here's why:
+* Allows visitors of the website to view sermons on the page without searching for their youtube channel in a new tab
+* Integrate videos into NLPC homepage via iframes produced by the script
+* Practice object oriented python scripting
+* Build fundamental understanding of working with REST API's
+
+### Built With
+* [Python](https://www.python.org/)
+* [MongoDB](https://www.mongodb.com/)
+
+
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+
+
+<!-- CONTACT -->
+## Contact
+
+Jon Ham - jondwoo@gmail.com
+
+
+
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=flat-square
+[contributors-url]: https://github.com/hsuki/Covid19-tracker/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=flat-square
+[forks-url]: https://github.com/hsuki/Covid19-tracker/network/members
+[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=flat-square
+[stars-url]: https://github.com/hsuki/Covid19-tracker/stargazers
+[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=flat-square
+[issues-url]: https://github.com/hsuki/Covid19-tracker/issues
+[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=flat-square
+[license-url]: https://github.com/hsuki/Covid19-tracker/blob/dev/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/feed/?trk=homepage-basic_google-one-tap-submit
+[product-screenshot]: src/img/covid-tracker-demo.png
+
